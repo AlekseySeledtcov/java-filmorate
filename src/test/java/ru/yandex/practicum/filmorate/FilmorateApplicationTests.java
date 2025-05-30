@@ -3,35 +3,41 @@ package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.validator.FilmValidator;
-import ru.yandex.practicum.filmorate.validator.UserValidator;
 
-import static org.junit.jupiter.api.Assertions.*;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 
 import java.time.LocalDate;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest
 class FilmorateApplicationTests {
-    User user1;
-    Film film1;
-    UserValidator uv;
-    FilmValidator fv;
+
+    private Validator validator;
+
+    private User user;
+    private Film film;
 
     @BeforeEach
     public void beforeEach() {
-        uv = new UserValidator();
-        fv = new FilmValidator();
-        user1 = User.builder()
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+
+        user = User.builder()
                 .name("Name")
-                .email("Email@email")
+                .email("Email@email.ru")
                 .login("Login")
                 .birthday(LocalDate.of(1980, 6, 19))
                 .build();
 
-        film1 = Film.builder()
+        film = Film.builder()
                 .name("FilmName")
                 .description("FilmDescription")
                 .releaseDate(LocalDate.of(2021, 9, 16))
@@ -40,84 +46,83 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    void checkingThatTheEmailIsIncorrect() {
-        assertThrows(ValidationException.class, () -> {
-            user1.setEmail("");
-            uv.validate(user1);
-        }, "Исключение, поле email не должно быть пустым");
+    void contextLoads() {
 
-        user1.setEmail("email");
-        assertThrows(ValidationException.class, () -> {
-            uv.validate(user1);
-        }, "Исключение, поле email должно содержать символ @");
+    }
+
+    @Test
+    void checkingThatTheEmailIsIncorrect() {
+        user.setEmail("");
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        assertFalse(violations.isEmpty());
     }
 
     @Test
     void checkingThatTheLoginIsIncorrect() {
-        user1.setEmail("emeail@email");
-        user1.setLogin("");
-        assertThrows(ValidationException.class, () -> {
-            uv.validate(user1);
-        }, "Исключение, поле login не должно быть пустым");
-
-        user1.setEmail("login login");
-        assertThrows(ValidationException.class, () -> {
-            uv.validate(user1);
-        }, "Исключение, поле login не должно содержать пробелы");
+        user.setLogin("");
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        assertFalse(violations.isEmpty(), "Логин не может быть пустым");
+        violations.clear();
+        user.setLogin(" ");
+        violations = validator.validate(user);
+        assertEquals(1, violations.size(), "Логин не может содержать символы пробела");
     }
 
     @Test
     void checkThatIfTheNameIsEmptyThenLoginIsUsedInsteadOfTheName() {
-        user1.setName("");
-        assertEquals(user1.getLogin(), uv.validate(user1).getName());
+        User user1 = User.builder()
+                .email("mail@email.ru")
+                .login("Login")
+                .name(null)
+                .birthday(LocalDate.of(1980, 6, 19))
+                .build();
+        assertEquals(user1.getLogin(), user1.getName(), "Если поле name пустое, то ему должно" +
+                "присвоиться занчение поля login");
     }
 
     @Test
     void checkingThatTheBirthdayDateCannotBeInTheFuture() {
-        user1.setBirthday(LocalDate.now().plusDays(1));
-        assertThrows(ValidationException.class, () -> {
-            uv.validate(user1);
-        }, "Исключение, дата дня рождения не может быть в будующем");
+        user.setBirthday(LocalDate.now().plusDays(1));
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        assertFalse(violations.isEmpty(), "дата дня рождения не может быть в будующем");
     }
 
     @Test
     void checkingThatTheFilmNameIsIncorrect() {
-        film1.setName("");
-        assertThrows(ValidationException.class, () -> {
-            fv.validate(film1);
-        }, "Исключение, поля name не должно быть пустым");
+        film.setName("");
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        assertFalse(violations.isEmpty(), "Название фильма не может быть пустым");
 
-        film1.setName(null);
-        film1.setName("");
-        assertThrows(ValidationException.class, () -> {
-            fv.validate(film1);
-        }, "Исключение, поля name не должно быть пустым");
+        violations.clear();
+
+        film.setName(null);
+        violations = validator.validate(film);
+        assertFalse(violations.isEmpty(), "Название фильма не может быть пустым");
     }
 
     @Test
     void checkThatTheDescriptionLengthCannotBeMoreThan200Characters() {
-        film1.setDescription("Это было самое большое описание к фильму " +
-                "которого нет и которое я не смог придумать, это было самое большое описание " +
-                "к фильму которого нет и которое я не смог придумать, это было самое большое " +
-                "описание к фильму которого нет и которое я не смог придумать");
-        assertThrows(ValidationException.class, () -> {
-            fv.validate(film1);
-        }, "Исключение, максимальная длинна описания - 200 симвлов");
+        StringBuilder description = new StringBuilder("Это было самое большое описание к фильму ");
+        while (description.length() < 200) {
+            description.append(description);
+        }
+        film.setDescription(description.toString());
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        assertFalse(violations.isEmpty(), "Максимальная длинна описания - 200 симвлов");
     }
 
     @Test
     void checkMovieReleaseDate() {
-        film1.setReleaseDate(LocalDate.of(1800, 1, 1));
-        assertThrows(ValidationException.class, () -> {
-            fv.validate(film1);
-        }, "Исключение, дата релиза фильма не должна быть раньше 28 декабря 1895 года");
+        film.setReleaseDate(LocalDate.of(1800, 1, 1));
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        assertFalse(violations.isEmpty(),
+                "Дата релиза фильма не должна быть раньше 28 декабря 1895 года");
     }
 
     @Test
     void movieDurationCheckMustBePositive() {
-        film1.setDuration(-1);
-        assertThrows(ValidationException.class, () -> {
-            fv.validate(film1);
-        }, "Исключение, продолжительность фильма должна быть положительной");
+        film.setDuration(-1);
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        assertFalse(violations.isEmpty(), "продолжительность фильма должна быть положительной");
     }
 }
