@@ -27,7 +27,7 @@ public class User {
     private Set<Long> friendsList;
 
     public User(String email, String login, String name, LocalDate birthday) {
-        id = 0l;
+        id = 0L;
         this.email = email;
         this.login = login;
         this.name = name == null ? login : name;
