@@ -26,7 +26,7 @@ public class UserService {
 
     public User update(User user) {
         if (!userStorage.containsUser(user.getId())) {
-            throw new NotFoundUserByIdException ("Не найден пользователь в методе update по id ", user.getId());
+            throw new NotFoundUserByIdException("Не найден пользователь в методе update по id ", user.getId());
         }
         User oldUser = userStorage.getUser(user.getId());
         if (user.getEmail() != null) {
@@ -54,7 +54,7 @@ public class UserService {
             throw new NotFoundUserByIdException("Не найден пользователь в методе addToFriendsList по id ", id);
         }
         if (!userStorage.containsUser(friendId)) {
-            throw new NotFoundUserByFriendIdException ("Не найден пользователь в методе addToFriendsList по friendId ",
+            throw new NotFoundUserByFriendIdException("Не найден пользователь в методе addToFriendsList по friendId ",
                     friendId);
         }
         log.info("Добавление пользователю с id {} друга с friendId {}", id, friendId);
@@ -69,10 +69,10 @@ public class UserService {
 
     public User deletingFromFriendList(long id, long friendId) {
         if (!userStorage.containsUser(id)) {
-            throw new NotFoundUserByIdException ("Не найден пользователь в методе deletingFromFriendList по id ", id);
+            throw new NotFoundUserByIdException("Не найден пользователь в методе deletingFromFriendList по id ", id);
         }
         if (!userStorage.containsUser(friendId)) {
-            throw new NotFoundUserByFriendIdException ("Не найден пользователь в методе deletingFromFriendList по friendId ",
+            throw new NotFoundUserByFriendIdException("Не найден пользователь в методе deletingFromFriendList по friendId ",
                     friendId);
         }
         userStorage.getUser(id).getFriendsList().remove(friendId);
@@ -82,7 +82,7 @@ public class UserService {
 
     public List<User> getUserFriendList(long id) {
         if (!userStorage.containsUser(id)) {
-            throw new NotFoundUserByIdException ("Не найден пользователь в методе getUserFriendList по id ", id);
+            throw new NotFoundUserByIdException("Не найден пользователь в методе getUserFriendList по id ", id);
         }
         return userStorage.getUser(id).getFriendsList().stream()
                 .map(userStorage::getUser)
@@ -91,10 +91,10 @@ public class UserService {
 
     public List<User> getUserCommonFriendList(Long id, Long otherId) {
         if (!userStorage.containsUser(id)) {
-            throw new NotFoundUserByIdException ("Не найден пользователь в методе getUserCommonFriendList по id ", id);
+            throw new NotFoundUserByIdException("Не найден пользователь в методе getUserCommonFriendList по id ", id);
         }
         if(!userStorage.containsUser(otherId)) {
-            throw new NotFoundUserByFriendIdException ("Не найден пользователь в методе deletingFromFriendList по otherId ",
+            throw new NotFoundUserByFriendIdException("Не найден пользователь в методе deletingFromFriendList по otherId ",
                     otherId);
         }
         User user = userStorage.getUser(id);
