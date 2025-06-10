@@ -1,14 +1,16 @@
 package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.*;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import ru.yandex.practicum.filmorate.annotations.After1895;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
-@Data
-@Builder
+@Getter
+@Setter
 public class Film {
     private Long id;
     @NotEmpty
@@ -20,4 +22,18 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private Integer duration;
+    private Set<Long> likeLIst;
+
+    public Film(String name, String description, LocalDate releaseDate, Integer duration) {
+        id = 0l;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        likeLIst = new HashSet<>();
+    }
+
+    public void updateFilmLikeList(long userId) {
+        likeLIst.add(userId);
+    }
 }

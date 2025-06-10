@@ -30,19 +30,10 @@ class FilmorateApplicationTests {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
 
-        user = User.builder()
-                .name("Name")
-                .email("Email@email.ru")
-                .login("Login")
-                .birthday(LocalDate.of(1980, 6, 19))
-                .build();
-
-        film = Film.builder()
-                .name("FilmName")
-                .description("FilmDescription")
-                .releaseDate(LocalDate.of(2021, 9, 16))
-                .duration(155)
-                .build();
+        user = new User("Email@email.ru", "Login", "Name",
+                LocalDate.of(1980, 6, 19));
+        film = new Film("FilmName", "FilmDescription",
+                LocalDate.of(2021, 9, 16), 155);
     }
 
     @Test
@@ -70,12 +61,9 @@ class FilmorateApplicationTests {
 
     @Test
     void checkThatIfTheNameIsEmptyThenLoginIsUsedInsteadOfTheName() {
-        User user1 = User.builder()
-                .email("mail@email.ru")
-                .login("Login")
-                .name(null)
-                .birthday(LocalDate.of(1980, 6, 19))
-                .build();
+        User user1 = new User("Email@email.ru", "Login", null,
+                LocalDate.of(1980, 6, 19));
+
         assertEquals(user1.getLogin(), user1.getName(), "Если поле name пустое, то ему должно" +
                 "присвоиться занчение поля login");
     }
