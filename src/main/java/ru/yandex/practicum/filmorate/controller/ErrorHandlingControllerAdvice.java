@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundExceptions;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundFilmException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByFriendIdException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByIdException;
@@ -47,14 +45,7 @@ public class ErrorHandlingControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
-    ErrorResponse NotFoundExceptionHandler(final NotFoundExceptions e) {
-        return new ErrorResponse("Объект не найден", e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ResponseBody
-    ErrorResponse NotFoundUserByIdExceptionHandler(final NotFoundUserByIdException e) {
+    ErrorResponse notFoundUserByIdExceptionHandler(final NotFoundUserByIdException e) {
         log.warn("Исключение, пользователь с id {} не найден", e.getId());
         return new ErrorResponse("Пользователь не найден", e.getDetailMessage());
     }
@@ -62,7 +53,7 @@ public class ErrorHandlingControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
-    ErrorResponse NotFoundUserByFriendIdException(final NotFoundUserByFriendIdException e) {
+    ErrorResponse notFoundUserByFriendIdException(final NotFoundUserByFriendIdException e) {
         log.warn("Исключение, пользователь с friendId {} не найден", e.getFriendId());
         return new ErrorResponse("Пользователь не найден", e.getDetailMessage());
     }
@@ -70,7 +61,7 @@ public class ErrorHandlingControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
-    ErrorResponse NotFoundFilmException(final NotFoundFilmException e) {
+    ErrorResponse notFoundFilmException(final NotFoundFilmException e) {
         log.warn("Исключение, фильм с Id {} не найден", e.getId());
         return new ErrorResponse("Фильм не найден", e.getDetailMessage());
     }
