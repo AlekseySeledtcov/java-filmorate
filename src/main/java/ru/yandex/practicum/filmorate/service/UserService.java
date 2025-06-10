@@ -93,7 +93,7 @@ public class UserService {
         if (!userStorage.containsUser(id)) {
             throw new NotFoundUserByIdException("Не найден пользователь в методе getUserCommonFriendList по id ", id);
         }
-        if(!userStorage.containsUser(otherId)) {
+        if (!userStorage.containsUser(otherId)) {
             throw new NotFoundUserByFriendIdException("Не найден пользователь в методе deletingFromFriendList по otherId ",
                     otherId);
         }
