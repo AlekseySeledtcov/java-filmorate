@@ -25,7 +25,7 @@ public class Film {
     private Set<Long> likeLIst;
 
     public Film(String name, String description, LocalDate releaseDate, Integer duration) {
-        id = 0l;
+        id = 0L;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
