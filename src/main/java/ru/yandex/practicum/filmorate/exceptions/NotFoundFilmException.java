@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.exceptions;
 import lombok.Getter;
 
 @Getter
-public class NotFoundFilmException extends RuntimeException{
+public class NotFoundFilmException extends RuntimeException {
     private final Long id;
 
     public NotFoundFilmException(String message, Long id) {
