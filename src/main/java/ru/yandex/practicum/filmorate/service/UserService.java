@@ -46,7 +46,9 @@ public class UserService {
     }
 
     public List<User> getUsersList() {
-        return userStorage.getUsersList().stream().sorted(Comparator.comparing(User::getId)).toList();
+        return userStorage.getUsersList().stream()
+                .sorted(Comparator.comparing(User::getId))
+                .toList();
     }
 
     public User addToFriendsList(long id, long friendId) {

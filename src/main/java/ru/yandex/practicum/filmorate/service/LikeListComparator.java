@@ -9,6 +9,6 @@ import java.util.Comparator;
 public class LikeListComparator implements Comparator<Film> {
     @Override
     public int compare(Film o1, Film o2) {
-        return o1.getLikeLIst().size() - o2.getLikeLIst().size();
+        return o1.getLikeList().size() - o2.getLikeList().size();
     }
 }

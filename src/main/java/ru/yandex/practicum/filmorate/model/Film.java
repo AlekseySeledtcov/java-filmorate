@@ -22,7 +22,7 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private Integer duration;
-    private Set<Long> likeLIst;
+    private Set<Long> likeList;
 
     public Film(String name, String description, LocalDate releaseDate, Integer duration) {
         id = 0L;
@@ -30,10 +30,10 @@ public class Film {
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        likeLIst = new HashSet<>();
+        likeList = new HashSet<>();
     }
 
     public void updateFilmLikeList(long userId) {
-        likeLIst.add(userId);
+        likeList.add(userId);
     }
 }

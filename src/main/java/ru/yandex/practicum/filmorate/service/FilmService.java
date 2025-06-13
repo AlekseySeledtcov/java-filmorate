@@ -73,11 +73,14 @@ public class FilmService {
             throw new NotFoundUserByIdException("Не найден пользователь в методе deleteLiketoFilm по userId ", userId);
         }
         Film film = filmStorage.getFilm(id);
-        film.getLikeLIst().remove(userId);
+        film.getLikeList().remove(userId);
         return filmStorage.updateFilm(film);
     }
 
     public List<Film> getPopularFilmsList(Long count) {
-        return filmStorage.getFilmsList().stream().limit(count).sorted(likeListComparator.reversed()).toList();
+        return filmStorage.getFilmsList().stream()
+                .limit(count)
+                .sorted(likeListComparator.reversed())
+                .toList();
     }
 }
