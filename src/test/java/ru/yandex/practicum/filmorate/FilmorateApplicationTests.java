@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.model.User;
 
 import jakarta.validation.ConstraintViolation;
@@ -12,6 +14,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,7 +36,8 @@ class FilmorateApplicationTests {
         user = new User("Email@email.ru", "Login", "Name",
                 LocalDate.of(1980, 6, 19));
         film = new Film("FilmName", "FilmDescription",
-                LocalDate.of(2021, 9, 16), 155);
+                LocalDate.of(2021, 9, 16), 155,
+                List.of(Genre.ACTION_MOVIE), List.of(Rating.G));
     }
 
     @Test
