@@ -35,9 +35,11 @@ class FilmorateApplicationTests {
 
         user = new User("Email@email.ru", "Login", "Name",
                 LocalDate.of(1980, 6, 19));
+//        film = new Film("FilmName", "FilmDescription",
+//                LocalDate.of(2021, 9, 16), 155,
+//                List.of(Genre.ACTION_MOVIE), List.of(Rating.G));
         film = new Film("FilmName", "FilmDescription",
-                LocalDate.of(2021, 9, 16), 155,
-                List.of(Genre.ACTION_MOVIE), List.of(Rating.G));
+                LocalDate.of(2021, 9, 16), 155);
     }
 
     @Test

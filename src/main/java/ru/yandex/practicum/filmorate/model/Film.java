@@ -28,18 +28,27 @@ public class Film {
     private List<Genre> genre;
     private List<Rating> rating;
 
-    public Film(String name, String description, LocalDate releaseDate, Integer duration,
-                List<Genre> genre, List<Rating> rating) {
+//    public Film(String name, String description, LocalDate releaseDate, Integer duration,
+//                List<Genre> genre, List<Rating> rating) {
+//        id = 0L;
+//        this.name = name;
+//        this.description = description;
+//        this.releaseDate = releaseDate;
+//        this.duration = duration;
+//        likeList = new HashSet<>();
+//        genre = new ArrayList<>();
+//        this.genre.addAll(genre);
+//        rating = new ArrayList<>();
+//        this.rating.addAll(rating);
+//    }
+
+    public Film(String name, String description, LocalDate releaseDate, Integer duration) {
         id = 0L;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
         likeList = new HashSet<>();
-        genre = new ArrayList<>();
-        this.genre.addAll(genre);
-        rating = new ArrayList<>();
-        this.rating.addAll(rating);
     }
 
     public void updateFilmLikeList(long userId) {
