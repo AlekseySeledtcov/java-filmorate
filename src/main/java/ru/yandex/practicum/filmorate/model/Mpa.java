@@ -1,15 +1,11 @@
 package ru.yandex.practicum.filmorate.model;
 
-
 import lombok.*;
 
-@Setter
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
-@Builder
-public class Genre {
-    private Integer id;
+public class Mpa {
+    private int id;
     private String name;
 }

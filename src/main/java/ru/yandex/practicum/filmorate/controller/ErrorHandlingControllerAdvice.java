@@ -10,9 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundFilmException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByFriendIdException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByIdException;
+import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.ErrorResponse;
 import ru.yandex.practicum.filmorate.model.ValidationErrorResponse;
 import ru.yandex.practicum.filmorate.model.Violation;
@@ -59,11 +57,35 @@ public class ErrorHandlingControllerAdvice {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    ErrorResponse notFoundFriendshipException(final NotFoundFriendshipException e) {
+        log.warn("Исключение, для пользователя с id {} не найден друг с friendId {}", e.getId(), e.getFriendId());
+        return new ErrorResponse("Дружба не найдена", e.getMessage());
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
     ErrorResponse notFoundFilmException(final NotFoundFilmException e) {
         log.warn("Исключение, фильм с Id {} не найден", e.getId());
         return new ErrorResponse("Фильм не найден", e.getDetailMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    ErrorResponse notFoundMpaException(final NotFoundMpaException e) {
+        log.warn("Исключение, рейтин MPA по id {} не найден", e.getId());
+        return new ErrorResponse("Рейтинг MPA не найден", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    ErrorResponse notFoundGenreException(final NotFoundGenreException e) {
+        log.warn("Исключение, жанр по id {} не найден", e.getMessage());
+        return new ErrorResponse("Жанр не найден", e.getMessage());
     }
 
     @ExceptionHandler

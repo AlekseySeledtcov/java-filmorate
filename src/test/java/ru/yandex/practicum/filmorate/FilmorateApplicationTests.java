@@ -20,6 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @SpringBootTest
 class FilmorateApplicationTests {
 
+    @Test
+    void contextLoads() {
+
+    }
+
     private Validator validator;
 
     private User user;
@@ -34,11 +39,6 @@ class FilmorateApplicationTests {
                 LocalDate.of(1980, 6, 19));
         film = new Film("FilmName", "FilmDescription",
                 LocalDate.of(2021, 9, 16), 155);
-    }
-
-    @Test
-    void contextLoads() {
-
     }
 
     @Test

@@ -23,12 +23,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film deleteFilm(Film film) {
-        log.info("Удаление фильма с id {}", film.getId());
-        return films.remove(film);
-    }
-
-    @Override
     public Film updateFilm(Film film) {
         log.info("Обновление фильма с id {}", film.getId());
         return films.put(film.getId(), film);
@@ -41,15 +35,25 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getFilmsList() {
+    public List<Film> getFilms() {
         log.info("Получение списка фильмов");
         return films.values().stream().toList();
     }
 
     @Override
-    public boolean containsFilm(long id) {
+    public boolean containsFilmById(long id) {
         log.info("Проверка наличия фильма с id {} в хранилище", id);
         return films.containsKey(id);
+    }
+
+    @Override
+    public List<Film> getPopularFilmList(int count) {
+        return List.of();
+    }
+
+    @Override
+    public boolean containsFilmByName(String name) {
+        return false;
     }
 
     private long getNextId() {
