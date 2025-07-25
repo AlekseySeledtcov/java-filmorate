@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -35,8 +36,21 @@ public class GenreService {
         return genreStorage.getGenresByFilmId(filmId);
     }
 
-    public void putGenre(long filmId, int genreId) {
-        genreStorage.putGenre(filmId, genreId);
+    public void putGenre(List<Genre> genres, long id) {
+        genres = genres.stream()
+                .distinct()
+                .collect(Collectors.toList());
+        for (int i = 0; i < genres.size(); i++) {
+            if (genres.get(i).getId() > genreStorage.getAllGenres().size()) {
+                log.warn("Жанр с индексом id {} в базе не найден", genres.get(i).getId());
+                throw new NotFoundGenreException(String.format("Жанр с индексом id %d в базе не найден",
+                        genres.get(i).getId()), genres.get(i).getId());
+            }
+            log.debug("GenreService. Обновление жанров");
+            if (genres.get(i).getId() != 0 && genres.get(i).getId() != null) {
+                genreStorage.putGenre(id, genres.get(i).getId());
+            }
+        }
     }
 
     public void deleteGenre(long filmId) {

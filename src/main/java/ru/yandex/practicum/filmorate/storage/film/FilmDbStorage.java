@@ -6,9 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundFilmException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundGenreException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.MpaService;
 import ru.yandex.practicum.filmorate.storage.BaseStorage;
@@ -62,7 +60,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         film.setId(filmId);
 
         if (film.getGenres().size() != 0) {
-            putGenres(film.getGenres(), film.getId());
+            genreService.putGenre(film.getGenres(), film.getId());
         }
         return film;
     }
@@ -87,7 +85,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
         if (film.getGenres().size() != 0) {
             genreService.deleteGenre(film.getId());
-            putGenres(film.getGenres(), film.getId());
+            genreService.putGenre(film.getGenres(), film.getId());
         }
         return film;
     }
@@ -131,20 +129,6 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         log.debug("FilmDbStorage. containsFilmByName Проверка ниличия фильма в БД с name {}", name);
         Long count = jdbc.queryForObject(CONTAINS_BY_NAME_QUERY, Long.class, name);
         return count > 0;
-    }
-
-    private void putGenres(List<Genre> genres, long id) {
-        for (int i = 0; i < genres.size(); i++) {
-            if (genres.get(i).getId() > genreService.getAllGenres().size()) {
-                log.warn("Жанр с индексом id {} в базе не найден", genres.get(i).getId());
-                throw new NotFoundGenreException(String.format("Жанр с индексом id %d в базе не найден",
-                        genres.get(i).getId()), genres.get(i).getId());
-            }
-            log.debug("FilmDbStorage. updateGenres Обновление жанров");
-            if (genres.get(i).getId() != 0 && genres.get(i).getId() != null) {
-                genreService.putGenre(id, genres.get(i).getId());
-            }
-        }
     }
 
     private long getLikeListsByFilmId(long id) {
