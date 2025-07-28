@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.exceptions;
 
 public class NotFoundGenreException extends RuntimeException {
-    long id;
+    private final long id;
 
     public NotFoundGenreException(String message, long id) {
         super(message);

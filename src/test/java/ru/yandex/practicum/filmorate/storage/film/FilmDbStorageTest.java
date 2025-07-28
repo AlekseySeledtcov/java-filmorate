@@ -12,7 +12,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.likeList.LikeListStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.time.LocalDate;
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class FilmDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
     private final FilmDbStorage filmStorage;
-    private final LikeListStorage likeListStorage;
+    private final LikeStorage likeStorage;
     private final UserDbStorage userDbStorage;
     private Film newFilm1;
     private Film newFilm2;
@@ -96,9 +96,9 @@ class FilmDbStorageTest {
         newFilm2 = filmStorage.addFilm(newFilm2);
         userDbStorage.addUser(newUser1);
         userDbStorage.addUser(newUser2);
-        likeListStorage.putLike(1,newFilm1.getId());
-        likeListStorage.putLike(1,newFilm2.getId());
-        likeListStorage.putLike(2,newFilm2.getId());
+        likeStorage.putLike(1,newFilm1.getId());
+        likeStorage.putLike(1,newFilm2.getId());
+        likeStorage.putLike(2,newFilm2.getId());
         List<Film> popularFilms = filmStorage.getPopularFilmList(3);
         assertTrue(popularFilms.get(0).getLikesCount() > popularFilms.get(1).getLikesCount());
     }

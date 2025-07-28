@@ -10,7 +10,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.MpaService;
 import ru.yandex.practicum.filmorate.storage.BaseStorage;
-import ru.yandex.practicum.filmorate.storage.likeList.LikeListStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 
 import java.sql.Date;
 import java.util.*;
@@ -19,22 +19,24 @@ import java.util.*;
 @Qualifier("FilmDbStorage")
 @Repository
 public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
-    private final LikeListStorage likeListStorage;
+    private final LikeStorage likeStorage;
     private final MpaService mpaService;
     private final GenreService genreService;
 
     public FilmDbStorage(JdbcTemplate jdbc,
                          RowMapper<Film> mapper,
-                         LikeListStorage likeListStorage,
+                         LikeStorage likeStorage,
                          MpaService mpaService,
                          GenreService genreService) {
         super(jdbc, mapper, Film.class);
-        this.likeListStorage = likeListStorage;
+        this.likeStorage = likeStorage;
         this.mpaService = mpaService;
         this.genreService = genreService;
     }
 
-    private static final String BASE_QUERY = "SELECT f.id, f.name, f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name FROM film AS f JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id";
+    private static final String BASE_QUERY = "SELECT f.id, f.name, f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name " +
+            "FROM film AS f " +
+            "JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id";
     private static final String FIND_ALL_QUERY = BASE_QUERY;
     private static final String CONTAINS_BY_ID_QUERY = "SELECT COUNT(*) FROM film WHERE id = ?";
     private static final String CONTAINS_BY_NAME_QUERY = "SELECT COUNT(*) FROM film WHERE name = ?";
@@ -43,7 +45,11 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     private static final String FIND_BY_ID_QUERY = BASE_QUERY + " WHERE id=?";
     private static final String UPDATE_QUERY = "UPDATE film SET name = ?, description = ?, " +
             "releaseDate = ?, duration = ?, rating_id = ? WHERE id = ?";
-    private static final String GET_POPULAR_FILMS_QUERY = "SELECT f.id, f.name, f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name, COUNT (ll.film_id) AS like_count FROM film AS f JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id JOIN like_list AS ll ON f.id=ll.film_id GROUP BY ll.film_id LIMIT ?";
+    private static final String GET_POPULAR_FILMS_QUERY = "SELECT f.id, f.name, f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name, COUNT (ll.film_id) AS like_count " +
+            "FROM film AS f " +
+            "JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id " +
+            "JOIN like_list AS ll ON f.id=ll.film_id " +
+            "GROUP BY ll.film_id LIMIT ?";
 
     @Override
     public Film addFilm(Film film) {
@@ -132,7 +138,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     }
 
     private long getLikeListsByFilmId(long id) {
-        return likeListStorage.getLikeListsByFilmId(id).size();
+        return likeStorage.getLikeListsByFilmId(id).size();
     }
 
 }

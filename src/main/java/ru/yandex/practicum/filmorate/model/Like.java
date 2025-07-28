@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class LikeList {
+public class Like {
 private long filmId;
 private long userId;
 }

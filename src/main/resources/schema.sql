@@ -40,3 +40,5 @@ CREATE TABLE IF NOT EXISTS friends_list (
 user_id INTEGER REFERENCES users (id) ON DELETE NO ACTION,
 friend_id INTEGER REFERENCES users (id) ON DELETE NO ACTION
 );
+
+CREATE INDEX index_id ON film (id);

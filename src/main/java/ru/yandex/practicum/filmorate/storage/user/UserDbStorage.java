@@ -31,12 +31,16 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
     private static final String CONTAINS_BY_ID_QUERY = " SELECT COUNT(*) FROM users WHERE id = ?";
     private static final String CONTAINS_BY_EMAIL_QUERY = " SELECT COUNT(*) FROM users WHERE email = ?";
     private static final String FIND_ALL_QUERY = "SELECT * FROM users";
-    private static final String FIND_ALL_FRIENDS_BY_USER_ID_QUERY = "SELECT * FROM users WHERE id in(SELECT friend_id FROM Friends_list where user_id=?)";
+    private static final String FIND_ALL_FRIENDS_BY_USER_ID_QUERY = "SELECT u.* " +
+            "FROM users AS u " +
+            "JOIN friends_list AS fl ON u.id=fl.friend_id " +
+            "WHERE fl.user_id=?";
 
-    private static final String FIND_COMMON_FRIENDS_BY_USER_ID_QUERY = "SELECT * FROM users WHERE id IN " +
-            "(SELECT f1.friend_id FROM friends_list f1 " +
-            "JOIN friends_list f2 ON f1.friend_id = f2.friend_id " +
-            "WHERE f1.user_id = ? AND f2.user_id = ?);";
+    private static final String FIND_COMMON_FRIENDS_BY_USER_ID_QUERY = "SELECT u.* " +
+            "FROM users AS u " +
+            "JOIN friends_list AS f1 ON u.id = f1.friend_id " +
+            "JOIN friends_list AS f2 ON f1.friend_id = f2.friend_id " +
+            "WHERE f1.user_id = ? AND f2.user_id = ?";
 
     @Override
     public User addUser(User user) {

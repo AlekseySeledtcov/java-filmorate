@@ -20,8 +20,6 @@ public class FriendListDbStorage extends BaseStorage<FriendsList> implements Fri
     private static final String DELETE_QUERY = "DELETE FROM friends_List WHERE user_id = ? AND friend_id = ?";
     private static final String SELECT_FRIEND_USER_QUERY = "SELECT * FROM friends_list " +
             "WHERE user_id = ? AND friend_id = ?";
-    private static final String FIND_FRIENDS_BY_USER_ID_QUERY = "SELECT * FROM users WHERE id in" +
-            "(SELECT friend_id FROM Friends_list where user_id=?)";
 
     @Override
     public void addFriend(long userId, long friendId) {

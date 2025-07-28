@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.likeList.LikeListStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
@@ -25,18 +25,18 @@ public class FilmService {
     private final UserStorage userStorage;
     private final MpaStorage mpaStorage;
     private final GenreStorage genreStorage;
-    private final LikeListStorage likeListStorage;
+    private final LikeStorage likeStorage;
 
     public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
                        @Qualifier("UserDbStorage") UserStorage userStorage,
                        MpaStorage mpaStorage,
                        GenreStorage genreStorage,
-                       LikeListStorage likeListStorage) {
+                       LikeStorage likeStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.mpaStorage = mpaStorage;
         this.genreStorage = genreStorage;
-        this.likeListStorage = likeListStorage;
+        this.likeStorage = likeStorage;
     }
 
     public Film addFilm(Film film) {
@@ -63,11 +63,11 @@ public class FilmService {
         if (!userStorage.containsUserById(userId)) {
             throw new NotFoundUserByIdException("Не найден пользователь в методе putLikeToFilm по userId ", userId);
         }
-        if (likeListStorage.containsLike(userId, filmId)) {
+        if (likeStorage.containsLike(userId, filmId)) {
             throw new DuplicatedDataException("Этим пользователем лайк уже поставлен");
         }
 
-        likeListStorage.putLike(userId, filmId);
+        likeStorage.putLike(userId, filmId);
 
         return filmStorage.getFilm(filmId);
     }
@@ -79,7 +79,7 @@ public class FilmService {
         if (!userStorage.containsUserById(userId)) {
             throw new NotFoundUserByIdException("Не найден пользователь в методе deleteLiketoFilm по userId ", userId);
         }
-        likeListStorage.deleteLike(filmId, userId);
+        likeStorage.deleteLike(filmId, userId);
         return filmStorage.getFilm(filmId);
     }
 

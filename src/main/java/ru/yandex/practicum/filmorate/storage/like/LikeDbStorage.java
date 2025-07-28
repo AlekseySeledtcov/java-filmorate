@@ -1,20 +1,20 @@
-package ru.yandex.practicum.filmorate.storage.likeList;
+package ru.yandex.practicum.filmorate.storage.like;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.model.LikeList;
+import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.storage.BaseStorage;
 
 import java.util.List;
 
 @Slf4j
 @Repository
-public class LikeListDbStorage extends BaseStorage implements LikeListStorage {
+public class LikeDbStorage extends BaseStorage implements LikeStorage {
 
-    public LikeListDbStorage(JdbcTemplate jdbc, RowMapper<LikeList> mapper) {
-        super(jdbc, mapper, LikeList.class);
+    public LikeDbStorage(JdbcTemplate jdbc, RowMapper<Like> mapper) {
+        super(jdbc, mapper, Like.class);
     }
 
     private static final String PUT_LIKE_QUERY = "INSERT INTO like_list(film_id, user_id)VALUES(?,?)";
@@ -39,10 +39,8 @@ public class LikeListDbStorage extends BaseStorage implements LikeListStorage {
         update(DELETE_LIKE_QUERY, filmId, userId);
     }
 
-    public List<LikeList> getLikeListsByFilmId(long filmId) {
+    public List<Like> getLikeListsByFilmId(long filmId) {
         log.debug("Хранилище. getLikeListsByFilmId filmId {}", filmId);
-//        System.out.println("LikeList для film id = " + filmId);
-//        System.out.println(findMany(GET_LIKELIST_BY_FILM_ID, filmId));
         return findMany(GET_LIKELIST_BY_FILM_ID, filmId);
     }
 }
