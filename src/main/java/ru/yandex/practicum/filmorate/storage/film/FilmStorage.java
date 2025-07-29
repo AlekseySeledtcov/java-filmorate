@@ -7,13 +7,15 @@ import java.util.List;
 public interface FilmStorage {
     Film addFilm(Film film);
 
-    Film deleteFilm(Film film);
-
     Film updateFilm(Film film);
 
     Film getFilm(long id);
 
-    List<Film> getFilmsList();
+    List<Film> getFilms();
 
-    boolean containsFilm(long id);
+    boolean containsFilmById(long id);
+
+    boolean containsFilmByName(String name);
+
+    List<Film> getPopularFilmList(int count);
 }

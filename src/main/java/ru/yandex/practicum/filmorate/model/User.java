@@ -2,19 +2,22 @@ package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.PastOrPresent;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.Past;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.yandex.practicum.filmorate.annotations.Login;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
-
     private Long id;
     @NotEmpty
     @Email
@@ -22,7 +25,7 @@ public class User {
     @Login
     private String login;
     private String name;
-    @PastOrPresent
+    @Past
     private LocalDate birthday;
     private Set<Long> friendsList;
 

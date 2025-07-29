@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -27,15 +28,9 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User deleteUser(User user) {
-        log.info("Удаление пользователя с id {}", user.getId());
-        return users.remove(user.getId());
-    }
-
-    @Override
-    public User getUser(long id) {
+    public Optional<User> getUser(long id) {
         log.info("Получение пользователя с id {}", id);
-        return users.get(id);
+        return Optional.of(users.get(id));
     }
 
     public List<User> getUsersList() {
@@ -44,11 +39,30 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
 
-    public boolean containsUser(long id) {
+    public boolean containsUserById(long id) {
         log.info("Проверка наличия пользователя с id {} в хранилише", id);
         return users.containsKey(id);
     }
 
+    @Override
+    public boolean containsUserByEmail(String email) {
+        return false;
+    }
+
+    @Override
+    public List<User> getUserFriendsList(long id) {
+        return users.get(id).getFriendsList().stream()
+                .map(userId -> users.get(userId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<User> getUsersCommonFriendList(Long id, Long otherId) {
+        return users.get(id).getFriendsList().stream()
+                .filter(friend -> users.get(otherId).getFriendsList().contains(friend))
+                .map(key -> users.get(key))
+                .collect(Collectors.toList());
+    }
 
     private long getNextId() {
         long currentMaxId = users.keySet()

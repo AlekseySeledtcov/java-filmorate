@@ -11,6 +11,7 @@ public class NotFoundFilmException extends RuntimeException {
         this.id = id;
     }
 
+
     public String getDetailMessage() {
         return getMessage() + " = " + id;
     }
