@@ -6,11 +6,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import ru.yandex.practicum.filmorate.exceptions.*;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundFilmException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundFriendshipException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundGenreException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundMpaException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundReactionException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundReviewException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByFriendIdException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByIdException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.ErrorResponse;
 import ru.yandex.practicum.filmorate.model.ValidationErrorResponse;
 import ru.yandex.practicum.filmorate.model.Violation;
@@ -76,7 +86,7 @@ public class ErrorHandlingControllerAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
     public ErrorResponse notFoundMpaException(final NotFoundMpaException exception) {
-        log.warn("Исключение, рейтин MPA по id {} не найден", exception.getId());
+        log.warn("Исключение, рейтинг MPA по id {} не найден", exception.getId());
         return new ErrorResponse("Рейтинг MPA не найден", exception.getMessage());
     }
 
@@ -94,4 +104,55 @@ public class ErrorHandlingControllerAdvice {
     public ErrorResponse handleThrowable(final Throwable exception) {
         return new ErrorResponse("Ошибка", "Произошла непредвиденная ошибка.");
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorResponse notFoundReviewException(final NotFoundReviewException exception) {
+        log.warn("Исключение, отзыв с Id {} не найден", exception.getId());
+        return new ErrorResponse("Отзыв не найден", exception.getDetailMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorResponse notFoundReactionException(final NotFoundReactionException exception) {
+        log.warn("Исключение, оценка отзыва не найдена - reviewId: {}, userId: {}",
+                exception.getReviewId(), exception.getUserId());
+        return new ErrorResponse("Оценка отзыва не найдена", exception.getDetailMessage());
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorResponse validationException(final ValidationException exception) {
+        log.warn("Ошибка валидации: {}", exception.getMessage());
+        return new ErrorResponse("Ошибка валидации", exception.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public ErrorResponse handleAllExceptions(Exception ex) {
+        log.error("Необработанное исключение: ", ex);
+        return new ErrorResponse("Внутренняя ошибка сервера", "Произошла непредвиденная ошибка");
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorResponse handleNoResourceFoundException(NoResourceFoundException ex) {
+        log.warn("Ресурс не найден: {}", ex.getMessage());
+        return new ErrorResponse("Ресурс не найден", "Запрашиваемый ресурс не существует");
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorResponse handleMissingParams(MissingServletRequestParameterException ex) {
+        log.warn("Отсутствует обязательный параметр: {}", ex.getParameterName());
+        return new ErrorResponse("Ошибка запроса", "Отсутствует обязательный параметр: " + ex.getParameterName());
+    }
+
+
 }

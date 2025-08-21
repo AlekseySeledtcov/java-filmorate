@@ -107,4 +107,31 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
         log.debug("Хранилище. getUsersCommonFriendList Получение списка общих друзей");
         return findMany(FIND_COMMON_FRIENDS_BY_USER_ID_QUERY, id, otherId);
     }
+
+    private static final String GET_SIMILAR_USERS_QUERY =
+            "SELECT DISTINCT l1.user_id " +
+                    "FROM like_list l1 " +
+                    "JOIN like_list l2 ON l1.film_id = l2.film_id " +
+                    "WHERE l2.user_id = ? AND l1.user_id != ? " +
+                    "GROUP BY l1.user_id " +
+                    "ORDER BY COUNT(l1.film_id) DESC " +
+                    "LIMIT 10";
+
+    @Override
+    public List<Long> getUsersWithSimilarTastes(long userId) {
+        log.debug("Поиск пользователей с похожими вкусами для пользователя ID: {}", userId);
+        String sql =
+                "SELECT DISTINCT l1.user_id, COUNT(l1.film_id) as film_count " +
+                        "FROM like_list l1 " +
+                        "JOIN like_list l2 ON l1.film_id = l2.film_id " +
+                        "WHERE l2.user_id = ? AND l1.user_id != ? " +
+                        "GROUP BY l1.user_id " +
+                        "ORDER BY film_count DESC " +
+                        "LIMIT 10";
+
+        return jdbc.query(sql,
+                (rs, rowNum) -> rs.getLong("user_id"),
+                userId, userId
+        );
+    }
 }

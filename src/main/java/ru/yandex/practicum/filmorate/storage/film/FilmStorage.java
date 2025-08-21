@@ -18,4 +18,8 @@ public interface FilmStorage {
     boolean containsFilmByName(String name);
 
     List<Film> getPopularFilmList(int count);
+
+    List<Film> getFilmsLikedByUser(long userId);
+
+    List<Film> getFilmsNotLikedByUser(long userId);
 }

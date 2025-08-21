@@ -1,13 +1,19 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Qualifier("inMemoryUserStorage")
 @Component
 public class InMemoryUserStorage implements UserStorage {
 
@@ -30,7 +36,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public Optional<User> getUser(long id) {
         log.info("Получение пользователя с id {}", id);
-        return Optional.of(users.get(id));
+        return Optional.ofNullable(users.get(id));
     }
 
     public List<User> getUsersList() {
@@ -40,28 +46,53 @@ public class InMemoryUserStorage implements UserStorage {
 
 
     public boolean containsUserById(long id) {
-        log.info("Проверка наличия пользователя с id {} в хранилише", id);
+        log.info("Проверка наличия пользователя с id {} в хранилище", id);
         return users.containsKey(id);
     }
 
     @Override
     public boolean containsUserByEmail(String email) {
-        return false;
+        log.info("Проверка наличия пользователя с email {}", email);
+        return users.values().stream()
+                .anyMatch(user -> user.getEmail().equalsIgnoreCase(email));
     }
 
     @Override
     public List<User> getUserFriendsList(long id) {
-        return users.get(id).getFriendsList().stream()
+        log.info("Получение списка друзей пользователя с id {}", id);
+        User user = users.get(id);
+        if (user == null || user.getFriendsList() == null) {
+            return List.of();
+        }
+        return user.getFriendsList().stream()
                 .map(userId -> users.get(userId))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<User> getUsersCommonFriendList(Long id, Long otherId) {
-        return users.get(id).getFriendsList().stream()
-                .filter(friend -> users.get(otherId).getFriendsList().contains(friend))
-                .map(key -> users.get(key))
+        log.info("Получение общих друзей пользователей {} и {}", id, otherId);
+        User user1 = users.get(id);
+        User user2 = users.get(otherId);
+
+        if (user1 == null || user2 == null ||
+                user1.getFriendsList() == null || user2.getFriendsList() == null) {
+            return List.of();
+        }
+
+        return user1.getFriendsList().stream()
+                .filter(friend -> user2.getFriendsList().contains(friend))
+                .map(userId -> users.get(userId))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Long> getUsersWithSimilarTastes(long userId) {
+        log.info("Получение пользователей с похожими вкусами для пользователя ID: {}", userId);
+        // В in-memory реализации возвращаем пустой список
+        return List.of();
     }
 
     private long getNextId() {

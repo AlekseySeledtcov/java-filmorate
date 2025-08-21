@@ -13,7 +13,8 @@ import ru.yandex.practicum.filmorate.storage.BaseStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 
 import java.sql.Date;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
 
 @Slf4j
 @Qualifier("FilmDbStorage")
@@ -139,6 +140,40 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
     private long getLikeListsByFilmId(long id) {
         return likeStorage.getLikeListsByFilmId(id).size();
+    }
+
+    private static final String GET_FILMS_LIKED_BY_USER_QUERY =
+            "SELECT f.id, f.name, f.description, f.releasedate, f.duration, mr.mpa_id, mr.mpa_name " +
+                    "FROM film f " +
+                    "JOIN mpa_rating mr ON f.rating_id = mr.mpa_id " +
+                    "JOIN like_list ll ON f.id = ll.film_id " +
+                    "WHERE ll.user_id = ?";
+
+    private static final String GET_FILMS_NOT_LIKED_BY_USER_QUERY =
+            "SELECT f.id, f.name, f.description, f.releasedate, f.duration, mr.mpa_id, mr.mpa_name " +
+                    "FROM film f " +
+                    "JOIN mpa_rating mr ON f.rating_id = mr.mpa_id " +
+                    "WHERE f.id NOT IN (" +
+                    "    SELECT film_id FROM like_list WHERE user_id = ?" +
+                    ")";
+
+    @Override
+    public List<Film> getFilmsLikedByUser(long userId) {
+        log.debug("Получение фильмов, которые понравились пользователю ID: {}", userId);
+        String query = BASE_QUERY +
+                " JOIN like_list ll ON f.id = ll.film_id " +
+                " WHERE ll.user_id = ?";
+        return findMany(query, userId);
+    }
+
+    @Override
+    public List<Film> getFilmsNotLikedByUser(long userId) {
+        log.debug("Получение фильмов, которые не понравились пользователю ID: {}", userId);
+        String query = BASE_QUERY +
+                " WHERE f.id NOT IN (" +
+                "   SELECT film_id FROM like_list WHERE user_id = ?" +
+                ")";
+        return findMany(query, userId);
     }
 
 }
