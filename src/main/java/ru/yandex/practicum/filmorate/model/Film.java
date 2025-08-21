@@ -28,6 +28,7 @@ public class Film {
     private Integer duration;
     private long likesCount;
     private List<Genre> genres = new ArrayList<>();
+    private List<Director> directors = new ArrayList<>();
     private Mpa mpa;
 
     public Film(String name, String description, LocalDate releaseDate, Integer duration) {

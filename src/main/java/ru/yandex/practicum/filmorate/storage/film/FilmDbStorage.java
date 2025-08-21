@@ -36,20 +36,35 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
     private static final String BASE_QUERY = "SELECT f.id, f.name, f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name " +
             "FROM film AS f " +
-            "JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id";
+            "JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id ";
     private static final String FIND_ALL_QUERY = BASE_QUERY;
     private static final String CONTAINS_BY_ID_QUERY = "SELECT COUNT(*) FROM film WHERE id = ?";
     private static final String CONTAINS_BY_NAME_QUERY = "SELECT COUNT(*) FROM film WHERE name = ?";
     private static final String INSERT_QUERY = "INSERT INTO film(name, description, releaseDate, duration, rating_id)" +
             "VALUES (?, ?, ?, ?, ?)";
-    private static final String FIND_BY_ID_QUERY = BASE_QUERY + " WHERE id=?";
+    private static final String FIND_BY_ID_QUERY = BASE_QUERY + "WHERE id=?";
     private static final String UPDATE_QUERY = "UPDATE film SET name = ?, description = ?, " +
             "releaseDate = ?, duration = ?, rating_id = ? WHERE id = ?";
-    private static final String GET_POPULAR_FILMS_QUERY = "SELECT f.id, f.name, f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name, COUNT (ll.film_id) AS like_count " +
+    private static final String GET_POPULAR_FILMS_QUERY = "SELECT f.id, f.name, f.description, f.releasedate," +
+            "f.duration, mr.mpa_id, mr.mpa_name, COUNT (ll.film_id) AS like_count " +
             "FROM film AS f " +
             "JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id " +
             "JOIN like_list AS ll ON f.id=ll.film_id " +
             "GROUP BY ll.film_id LIMIT ?";
+    private static final String GET_FILMS_BY_DIRECTOR_ID_SORTED_BY_YEARS = BASE_QUERY +
+            "JOIN film_director AS fd ON f.id=fd.film_id " +
+            "WHERE director_id=? " +
+            "ORDER BY f.releasedate";
+    private static final String GET_FILMS_BY_DIRECTOR_ID_SORTED_BY_LIKE = "SELECT f.id, f.name, " +
+            "f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name, COUNT(ll.film_id) AS like_count " +
+            "FROM film AS f " +
+            "JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id " +
+            "JOIN like_list as ll ON f.id=ll.film_id " +
+            "JOIN film_director AS fd ON f.id=fd.film_id " +
+            "WHERE director_id=? " +
+            "GROUP BY f.id " +
+            "ORDER BY like_count DESC";
+
 
     @Override
     public Film addFilm(Film film) {
@@ -88,7 +103,6 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                 film.getMpa().getId(),
                 film.getId()
         );
-
         if (film.getGenres().size() != 0) {
             genreService.deleteGenre(film.getId());
             genreService.putGenre(film.getGenres(), film.getId());
@@ -135,6 +149,20 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         log.debug("FilmDbStorage. containsFilmByName Проверка ниличия фильма в БД с name {}", name);
         Long count = jdbc.queryForObject(CONTAINS_BY_NAME_QUERY, Long.class, name);
         return count > 0;
+    }
+
+    @Override
+    public List<Film> getFilmsByDirectorSorted(long directorId, String sortedBy) {
+        log.debug("FilmDbStorage. getFilmsByDirectorSorted directorId {} sortedBy {}", directorId, sortedBy);
+        List<Film> films;
+        if (sortedBy.equals("year")) {
+            films = findMany(GET_FILMS_BY_DIRECTOR_ID_SORTED_BY_YEARS, directorId);
+        } else {
+            films = findMany(GET_FILMS_BY_DIRECTOR_ID_SORTED_BY_LIKE, directorId);
+            System.out.println("выполнился запрос");
+            System.out.println(films);
+        }
+        return films;
     }
 
     private long getLikeListsByFilmId(long id) {

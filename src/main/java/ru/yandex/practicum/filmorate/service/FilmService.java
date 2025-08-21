@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -15,7 +14,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 public class FilmService {
     @Autowired
@@ -26,17 +24,20 @@ public class FilmService {
     private final MpaStorage mpaStorage;
     private final GenreStorage genreStorage;
     private final LikeStorage likeStorage;
+    private final DirectorService directorService;
 
     public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
                        @Qualifier("UserDbStorage") UserStorage userStorage,
                        MpaStorage mpaStorage,
                        GenreStorage genreStorage,
-                       LikeStorage likeStorage) {
+                       LikeStorage likeStorage,
+                       DirectorService directorService) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.mpaStorage = mpaStorage;
         this.genreStorage = genreStorage;
         this.likeStorage = likeStorage;
+        this.directorService = directorService;
     }
 
     public Film addFilm(Film film) {
@@ -53,6 +54,10 @@ public class FilmService {
             throw new NotFoundFilmException("Не найден фильм в методе updateFilm по id ", film.getId());
         }
 
+        if (film.getDirectors().size() != 0) {
+            directorService.deleteDirectorsFromFilm(film.getId());
+            directorService.putDirectorsToFilm(film.getDirectors(), film.getId());
+        }
         return filmStorage.updateFilm(film);
     }
 
@@ -91,6 +96,21 @@ public class FilmService {
     public Film getFilmWithGenreById(long genreId) {
         return filmStorage.getFilm(genreId);
     }
+
+    public List<Film> getFilmsByDirectorSorted(long directorId, String sortedBy) {
+        List<Film> films = filmStorage.getFilmsByDirectorSorted(directorId, sortedBy);
+        System.out.println("Service");
+        System.out.println(films);
+        films.forEach(this::addData);
+        System.out.println(films);
+        return films;
+    }
+
+    private Film addData(Film film) {
+        film.setDirectors(directorService.getDirectorsByFilmId(film.getId()));
+        return film;
+    }
+
 }
 
 
