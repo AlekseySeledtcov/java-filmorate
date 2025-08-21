@@ -35,11 +35,14 @@ public class Review {
     @NotNull(message = "ID фильма должен быть указан")
     private Long filmId;
 
-    private Integer useful;
+    @Builder.Default
+    private Integer useful = 0;
 
     private LocalDateTime created;
 
+    @Builder.Default
     private Set<Long> likes = new HashSet<>();
 
+    @Builder.Default
     private Set<Long> dislikes = new HashSet<>();
 }

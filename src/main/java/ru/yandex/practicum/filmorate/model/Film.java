@@ -27,10 +27,7 @@ public class Film {
     @Positive
     private Integer duration;
     private long likesCount;
-
-    @Builder.Default
     private List<Genre> genres = new ArrayList<>();
-
     private Mpa mpa;
 
     public Film(String name, String description, LocalDate releaseDate, Integer duration) {
