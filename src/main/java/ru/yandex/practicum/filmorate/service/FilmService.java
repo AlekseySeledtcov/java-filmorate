@@ -21,8 +21,6 @@ public class FilmService {
     private final FilmStorage filmStorage;
     @Qualifier("UserDbStorage")
     private final UserStorage userStorage;
-    private final MpaStorage mpaStorage;
-    private final GenreStorage genreStorage;
     private final LikeStorage likeStorage;
     private final DirectorService directorService;
 
@@ -34,8 +32,6 @@ public class FilmService {
                        DirectorService directorService) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
-        this.mpaStorage = mpaStorage;
-        this.genreStorage = genreStorage;
         this.likeStorage = likeStorage;
         this.directorService = directorService;
     }
@@ -54,7 +50,7 @@ public class FilmService {
             throw new NotFoundFilmException("Не найден фильм в методе updateFilm по id ", film.getId());
         }
 
-        if (film.getDirectors().size() != 0) {
+        if (!film.getDirectors().isEmpty()) {
             directorService.deleteDirectorsFromFilm(film.getId());
             directorService.putDirectorsToFilm(film.getDirectors(), film.getId());
         }

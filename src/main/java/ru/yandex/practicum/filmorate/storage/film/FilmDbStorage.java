@@ -80,7 +80,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
         film.setId(filmId);
 
-        if (film.getGenres().size() != 0) {
+        if (!film.getGenres().isEmpty()) {
             genreService.putGenre(film.getGenres(), film.getId());
         }
         return film;
@@ -103,7 +103,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                 film.getMpa().getId(),
                 film.getId()
         );
-        if (film.getGenres().size() != 0) {
+        if (!film.getGenres().isEmpty()) {
             genreService.deleteGenre(film.getId());
             genreService.putGenre(film.getGenres(), film.getId());
         }

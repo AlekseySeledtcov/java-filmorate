@@ -29,7 +29,7 @@ public class FilmController {
 
     @GetMapping
     public List<Film> getFilms() {
-        log.debug("FilmController. Запрос на список фильмов {}");
+        log.debug("FilmController. Запрос на список фильмов");
         return filmService.getFilms();
     }
 

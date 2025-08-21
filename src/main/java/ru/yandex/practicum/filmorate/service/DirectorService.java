@@ -43,8 +43,8 @@ public class DirectorService {
     }
 
     public void putDirectorsToFilm(List<Director> directors, long filmId) {
-        for (int i = 0; i < directors.size(); i++) {
-            directorDbStorage.putDirectorsToFilm(directors.get(i).getId(), filmId);
+        for (Director director : directors) {
+            directorDbStorage.putDirectorsToFilm(director.getId(), filmId);
         }
     }
 
