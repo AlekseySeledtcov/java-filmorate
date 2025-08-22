@@ -61,4 +61,12 @@ public class UserController {
                 "и другого пользователя с otherId {}", id, otherId);
         return userService.getUsersCommonFriendList(id, otherId);
     }
+
+    // Новый эндпоинт для подтверждения дружбы
+    @PutMapping("/{id}/friends/{friendId}/confirm")
+    public void confirmFriendship(@PathVariable("id") long id,
+                                  @PathVariable("friendId") long friendId) {
+        log.debug("Контроллер. Подтверждение дружбы между {} и {}", id, friendId);
+        userService.confirmFriendship(id, friendId);
+    }
 }

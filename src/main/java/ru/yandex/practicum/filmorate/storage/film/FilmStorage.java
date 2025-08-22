@@ -21,5 +21,4 @@ public interface FilmStorage {
 
     List<Film> getFilmsLikedByUser(long userId);
 
-    List<Film> getFilmsNotLikedByUser(long userId);
 }

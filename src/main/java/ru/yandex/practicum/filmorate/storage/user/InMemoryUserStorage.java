@@ -39,12 +39,13 @@ public class InMemoryUserStorage implements UserStorage {
         return Optional.ofNullable(users.get(id));
     }
 
+    @Override
     public List<User> getUsersList() {
         log.info("Получение списка пользователей из хранилища");
         return users.values().stream().toList();
     }
 
-
+    @Override
     public boolean containsUserById(long id) {
         log.info("Проверка наличия пользователя с id {} в хранилище", id);
         return users.containsKey(id);
@@ -93,6 +94,15 @@ public class InMemoryUserStorage implements UserStorage {
         log.info("Получение пользователей с похожими вкусами для пользователя ID: {}", userId);
         // В in-memory реализации возвращаем пустой список
         return List.of();
+    }
+
+    @Override
+    public List<User> getUsersByIds(List<Long> userIds) {
+        log.info("Получение пользователей по списку ID: {}", userIds);
+        // Фильтруем пользователей по переданным ID
+        return users.values().stream()
+                .filter(user -> userIds.contains(user.getId()))
+                .collect(Collectors.toList());
     }
 
     private long getNextId() {

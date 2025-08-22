@@ -24,4 +24,7 @@ public interface UserStorage {
     List<User> getUsersCommonFriendList(Long id, Long otherId);
 
     List<Long> getUsersWithSimilarTastes(long userId);
+
+    List<User> getUsersByIds(List<Long> userIds);
+
 }

@@ -15,6 +15,7 @@ public class FriendListRowMapper implements RowMapper<FriendsList> {
 
         friendsList.setUserId(resultSet.getInt("user_id"));
         friendsList.setFriendId(resultSet.getInt("friend_id"));
+        friendsList.setStatus(resultSet.getString("status")); // Добавляем статус
         return friendsList;
     }
 }

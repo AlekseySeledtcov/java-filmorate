@@ -41,8 +41,10 @@ user_id INTEGER REFERENCES users (id) ON DELETE NO ACTION
 );
 
 CREATE TABLE IF NOT EXISTS friends_list (
-user_id INTEGER REFERENCES users (id) ON DELETE NO ACTION,
-friend_id INTEGER REFERENCES users (id) ON DELETE NO ACTION
+    user_id INTEGER REFERENCES users (id) ON DELETE CASCADE,
+    friend_id INTEGER REFERENCES users (id) ON DELETE CASCADE,
+    status VARCHAR(20) DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'CONFIRMED')),
+    PRIMARY KEY (user_id, friend_id)
 );
 
 -- Таблица для отзывов

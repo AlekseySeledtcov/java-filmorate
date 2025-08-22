@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.BaseStorage;
 
 import java.sql.Date;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,16 +32,16 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
     private static final String CONTAINS_BY_ID_QUERY = " SELECT COUNT(*) FROM users WHERE id = ?";
     private static final String CONTAINS_BY_EMAIL_QUERY = " SELECT COUNT(*) FROM users WHERE email = ?";
     private static final String FIND_ALL_QUERY = "SELECT * FROM users";
-    private static final String FIND_ALL_FRIENDS_BY_USER_ID_QUERY = "SELECT u.* " +
-            "FROM users AS u " +
-            "JOIN friends_list AS fl ON u.id=fl.friend_id " +
-            "WHERE fl.user_id=?";
+    private static final String FIND_ALL_FRIENDS_BY_USER_ID_QUERY =
+            "SELECT u.* FROM users AS u " +
+                    "JOIN friends_list AS fl ON u.id = fl.friend_id " +
+                    "WHERE fl.user_id = ? AND fl.status = 'CONFIRMED'";
 
-    private static final String FIND_COMMON_FRIENDS_BY_USER_ID_QUERY = "SELECT u.* " +
-            "FROM users AS u " +
-            "JOIN friends_list AS f1 ON u.id = f1.friend_id " +
-            "JOIN friends_list AS f2 ON f1.friend_id = f2.friend_id " +
-            "WHERE f1.user_id = ? AND f2.user_id = ?";
+    private static final String FIND_COMMON_FRIENDS_BY_USER_ID_QUERY =
+            "SELECT u.* FROM users AS u " +
+                    "JOIN friends_list AS f1 ON u.id = f1.friend_id AND f1.status = 'CONFIRMED' " +
+                    "JOIN friends_list AS f2 ON u.id = f2.friend_id AND f2.status = 'CONFIRMED' " +
+                    "WHERE f1.user_id = ? AND f2.user_id = ?";
 
     @Override
     public User addUser(User user) {
@@ -108,15 +109,6 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
         return findMany(FIND_COMMON_FRIENDS_BY_USER_ID_QUERY, id, otherId);
     }
 
-    private static final String GET_SIMILAR_USERS_QUERY =
-            "SELECT DISTINCT l1.user_id " +
-                    "FROM like_list l1 " +
-                    "JOIN like_list l2 ON l1.film_id = l2.film_id " +
-                    "WHERE l2.user_id = ? AND l1.user_id != ? " +
-                    "GROUP BY l1.user_id " +
-                    "ORDER BY COUNT(l1.film_id) DESC " +
-                    "LIMIT 10";
-
     @Override
     public List<Long> getUsersWithSimilarTastes(long userId) {
         log.debug("Поиск пользователей с похожими вкусами для пользователя ID: {}", userId);
@@ -133,5 +125,22 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
                 (rs, rowNum) -> rs.getLong("user_id"),
                 userId, userId
         );
+    }
+
+    @Override
+    public List<User> getUsersByIds(List<Long> userIds) {
+        log.debug("Хранилище. getUsersByIds получение пользователей по списку ID: {}", userIds);
+
+        if (userIds == null || userIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String placeholders = userIds.stream()
+                .map(id -> "?")
+                .collect(Collectors.joining(","));
+
+        String query = String.format("SELECT * FROM users WHERE id IN (%s)", placeholders);
+
+        return findMany(query, userIds.toArray());
     }
 }

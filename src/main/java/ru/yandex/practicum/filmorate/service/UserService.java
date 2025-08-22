@@ -3,13 +3,19 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.*;
+import ru.yandex.practicum.filmorate.exceptions.DuplicatedDataException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundFriendshipException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByFriendIdException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByIdException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.FriendsList;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FriendListStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -43,26 +49,6 @@ public class UserService {
         return userStorage.getUsersList().stream()
                 .sorted(Comparator.comparing(User::getId))
                 .toList();
-    }
-
-    public List<User> addToFriendsList(long userId, long friendId) {
-        if (!userStorage.containsUserById(userId)) {
-            throw new NotFoundUserByIdException("Не найден пользователь в методе addToFriendsList по id ", userId);
-        }
-        if (!userStorage.containsUserById(friendId)) {
-            throw new NotFoundUserByFriendIdException("Не найден пользователь в методе addToFriendsList по friendId ",
-                    friendId);
-        }
-        if (friendListStorage.containsFriend(userId, friendId)) {
-            throw new DuplicatedDataException("Пользователь с id " + friendId +
-                    " уже я вляется другом пользователя с id " + userId);
-        }
-
-        log.debug("Сервис. Добавление пользователю с id {} друга с friendId {}", userId, friendId);
-        friendListStorage.addFriend(userId, friendId);
-
-        log.debug("Сервис. Получение списка друзей пользователя с id {}", userId);
-        return userStorage.getUserFriendsList(userId);
     }
 
     public List<User> deletingFromFriendList(long id, long friendId) {
@@ -100,4 +86,56 @@ public class UserService {
         }
         return userStorage.getUsersCommonFriendList(id, otherId);
     }
+
+    // Новый метод для подтверждения дружбы
+    public void confirmFriendship(long userId, long friendId) {
+        validateUsers(userId, friendId);
+        // Теперь дружба сразу подтверждена, поэтому этот метод может быть пустым
+        // или просто обновлять статус на CONFIRMED (что уже делается при добавлении)
+        friendListStorage.updateFriendshipStatus(userId, friendId, "CONFIRMED");
+        log.debug("Дружба между {} и {} подтверждена", userId, friendId);
+    }
+
+    // Новый метод для получения ожидающих подтверждения запросов
+    public List<User> getPendingFriendRequests(long userId) {
+        if (!userStorage.containsUserById(userId)) {
+            throw new NotFoundUserByIdException("Пользователь не найден", userId);
+        }
+
+        // Получаем ID пользователей, которые отправили запросы текущему пользователю
+        List<FriendsList> pendingRequests = friendListStorage.getFriendsWithStatus(userId, "PENDING");
+        List<Long> userIds = pendingRequests.stream()
+                .map(FriendsList::getUserId)
+                .collect(Collectors.toList());
+
+        return userStorage.getUsersByIds(userIds);
+    }
+
+    // Вспомогательный метод для валидации пользователей
+    private void validateUsers(long userId, long friendId) {
+        if (!userStorage.containsUserById(userId)) {
+            throw new NotFoundUserByIdException("Пользователь не найден", userId);
+        }
+        if (!userStorage.containsUserById(friendId)) {
+            throw new NotFoundUserByFriendIdException("Пользователь не найден", friendId);
+        }
+        if (userId == friendId) {
+            throw new ValidationException("Нельзя добавить самого себя в друзья");
+        }
+    }
+
+    // Обновляем метод добавления в друзья для работы со статусом
+    public List<User> addToFriendsList(long userId, long friendId) {
+        validateUsers(userId, friendId);
+
+        if (friendListStorage.containsFriend(userId, friendId)) {
+            throw new DuplicatedDataException("Пользователь уже в списке друзей");
+        }
+
+        log.debug("Сервис. Добавление пользователю с id {} друга с friendId {}", userId, friendId);
+        friendListStorage.addFriend(userId, friendId);
+
+        return userStorage.getUserFriendsList(userId);
+    }
 }
+

@@ -72,12 +72,12 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<Film> getFilmsNotLikedByUser(long userId) {
-        log.info("Получение фильмов, которые не понравились пользователю ID: {}", userId);
-        // В in-memory реализации возвращаем пустой список
-        return List.of();
-    }
+//    @Override
+//    public List<Film> getFilmsNotLikedByUser(long userId) {
+//        log.info("Получение фильмов, которые не понравились пользователю ID: {}", userId);
+//        // В in-memory реализации возвращаем пустой список
+//        return List.of();
+//    }
 
     private long getNextId() {
         long currentMaxId = films.keySet()

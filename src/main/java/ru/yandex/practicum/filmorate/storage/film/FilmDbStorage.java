@@ -165,15 +165,4 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                 " WHERE ll.user_id = ?";
         return findMany(query, userId);
     }
-
-    @Override
-    public List<Film> getFilmsNotLikedByUser(long userId) {
-        log.debug("Получение фильмов, которые не понравились пользователю ID: {}", userId);
-        String query = BASE_QUERY +
-                " WHERE f.id NOT IN (" +
-                "   SELECT film_id FROM like_list WHERE user_id = ?" +
-                ")";
-        return findMany(query, userId);
-    }
-
 }
