@@ -5,9 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundFilmException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.MpaService;
 import ru.yandex.practicum.filmorate.storage.BaseStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
@@ -21,17 +19,14 @@ import java.util.*;
 public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     private final LikeStorage likeStorage;
     private final MpaService mpaService;
-    private final GenreService genreService;
 
     public FilmDbStorage(JdbcTemplate jdbc,
                          RowMapper<Film> mapper,
                          LikeStorage likeStorage,
-                         MpaService mpaService,
-                         GenreService genreService) {
+                         MpaService mpaService) {
         super(jdbc, mapper, Film.class);
         this.likeStorage = likeStorage;
         this.mpaService = mpaService;
-        this.genreService = genreService;
     }
 
     private static final String BASE_QUERY = "SELECT f.id, f.name, f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name " +
@@ -77,12 +72,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                 film.getDuration(),
                 mpaService.getMpaById(film.getMpa().getId()).getId()
         );
-
         film.setId(filmId);
-
-        if (!film.getGenres().isEmpty()) {
-            genreService.putGenre(film.getGenres(), film.getId());
-        }
         return film;
     }
 
@@ -103,37 +93,19 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                 film.getMpa().getId(),
                 film.getId()
         );
-        if (!film.getGenres().isEmpty()) {
-            genreService.deleteGenre(film.getId());
-            genreService.putGenre(film.getGenres(), film.getId());
-        }
         return film;
     }
 
     @Override
     public List<Film> getPopularFilmList(int count) {
         log.debug("FilmDbStorage. getPopularFilmList count {}", count);
-        List<Film> films = findMany(GET_POPULAR_FILMS_QUERY, count);
-        for (Film film : films) {
-            film.setLikesCount(getLikeListsByFilmId(film.getId()));
-        }
-        return films.stream()
-                .sorted(Comparator.comparing(Film::getLikesCount).reversed())
-                .toList();
+        return findMany(GET_POPULAR_FILMS_QUERY, count);
     }
 
     @Override
-    public Film getFilm(long id) {
+    public Optional<Film> getFilm(long id) {
         log.debug("FilmDbStorage. getFilm. с id {}", id);
-        Film film = findOne(FIND_BY_ID_QUERY, id).orElseThrow(() -> {
-            log.warn("Storage, getFilm, фильм с id {} не найден");
-            throw new NotFoundFilmException(String.format("Фильм с id %d не найден", id), id);
-        });
-
-        if (genreService.containsGenre(film.getId())) {
-            film.setGenres(genreService.getGenresByFilmId(film.getId()));
-        }
-        return film;
+        return findOne(FIND_BY_ID_QUERY, id);
     }
 
     @Override
@@ -165,7 +137,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         return films;
     }
 
-    private long getLikeListsByFilmId(long id) {
+    public long getLikeListsByFilmId(long id) {
         return likeStorage.getLikeListsByFilmId(id).size();
     }
 

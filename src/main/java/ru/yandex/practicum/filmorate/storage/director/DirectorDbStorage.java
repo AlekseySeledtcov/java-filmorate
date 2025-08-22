@@ -4,11 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundEntityByIdException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.BaseStorage;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Repository
@@ -35,13 +35,9 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
     }
 
     @Override
-    public Director getDirectorById(long id) {
+    public Optional<Director> getDirectorById(long id) {
         log.debug("DirectorDbStorage. getDirectorById id={}", id);
-        return findOne(GET_DIRECTOR_BY_ID_QUERY, id).orElseThrow(() -> {
-                    log.warn("Storage, getDirectorById, режисер с id {} не найден", id);
-                    throw new NotFoundEntityByIdException("Режиссер не найден", id);
-                }
-        );
+        return findOne(GET_DIRECTOR_BY_ID_QUERY, id);
     }
 
     @Override

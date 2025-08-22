@@ -48,7 +48,7 @@ public class FilmController {
     @DeleteMapping("{id}/like/{userId}")
     public Film deleteLiketoFilm(@PathVariable("id") long id, @PathVariable("userId") long userId) {
         log.debug("FilmController. Запрос на удаление лайка");
-        return filmService.deleteLiketoFilm(id, userId);
+        return filmService.deleteLikeToFilm(id, userId);
     }
 
     @GetMapping("/popular")
@@ -58,9 +58,9 @@ public class FilmController {
     }
 
     @GetMapping("/{id}")
-    public Film getFilmWithGenreById(@PathVariable("id") long genreId) {
-        log.debug("FilmController. getFilmWithGenreById genreId={}", genreId);
-        return filmService.getFilmWithGenreById(genreId);
+    public Film getFilmWithGenreById(@PathVariable("id") long id) {
+        log.debug("FilmController. getFilmWithGenreById id={}", id);
+        return filmService.getFilmWithGenreById(id);
     }
 
     @GetMapping("/director/{directorId}")
