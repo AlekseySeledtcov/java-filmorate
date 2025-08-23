@@ -7,7 +7,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.service.DirectorService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
