@@ -10,7 +10,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByIdException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.FriendsList;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FriendListStorage;
+import ru.yandex.practicum.filmorate.storage.friendlist.FriendListStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Comparator;
