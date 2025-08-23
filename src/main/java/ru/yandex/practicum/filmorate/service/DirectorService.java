@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundEntityByIdException;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -13,7 +14,7 @@ import java.util.List;
 public class DirectorService {
     private final DirectorStorage directorDbStorage;
 
-    public DirectorService(DirectorStorage directorDbStorage) {
+    public DirectorService(@Qualifier("DirectorDbStorage") DirectorStorage directorDbStorage) {
         this.directorDbStorage = directorDbStorage;
     }
 
