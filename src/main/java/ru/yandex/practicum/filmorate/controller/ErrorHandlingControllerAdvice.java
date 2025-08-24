@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -12,15 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundFilmException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundFriendshipException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundGenreException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundMpaException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundReactionException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundReviewException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByFriendIdException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByIdException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.ErrorResponse;
 import ru.yandex.practicum.filmorate.model.ValidationErrorResponse;
 import ru.yandex.practicum.filmorate.model.Violation;
@@ -160,6 +153,15 @@ public class ErrorHandlingControllerAdvice {
     public ErrorResponse handleMissingParams(MissingServletRequestParameterException ex) {
         log.warn("Отсутствует обязательный параметр: {}", ex.getParameterName());
         return new ErrorResponse("Ошибка запроса", "Отсутствует обязательный параметр: " + ex.getParameterName());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorResponse handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        log.warn("Ошибка чтения тела запроса: {}", ex.getMessage());
+        return new ErrorResponse("Тело запроса не может быть пустым",
+                "Проверьте формат JSON и наличие обязательных полей");
     }
 
 

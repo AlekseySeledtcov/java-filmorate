@@ -9,12 +9,11 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -115,8 +114,6 @@ public class FilmService {
 
     public List<Film> getPopularFilmList(int count) {
         log.debug("Получение {} популярных фильмов", count);
-        return filmStorage.getPopularFilmList(count).stream()
-                .collect(Collectors.toList());
         List<Film> films = filmStorage.getPopularFilmList(count);
         for (Film film : films) {
             film.setLikesCount(filmStorage.getLikeListsByFilmId(film.getId()));
@@ -136,10 +133,7 @@ public class FilmService {
 
     public List<Film> getFilmsByDirectorSorted(long directorId, String sortedBy) {
         List<Film> films = filmStorage.getFilmsByDirectorSorted(directorId, sortedBy);
-        System.out.println("Service");
-        System.out.println(films);
         films.forEach(this::addData);
-        System.out.println(films);
         return films;
     }
 
