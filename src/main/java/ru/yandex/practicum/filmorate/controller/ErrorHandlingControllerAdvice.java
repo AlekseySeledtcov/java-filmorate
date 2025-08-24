@@ -99,6 +99,14 @@ public class ErrorHandlingControllerAdvice {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorResponse notFoundEntityByIdException(final NotFoundEntityByIdException exception) {
+        log.warn("Исключение, {}", exception.getDetailMessage());
+        return new ErrorResponse(exception.getMessage(), exception.getDetailMessage());
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public ErrorResponse handleThrowable(final Throwable exception) {
