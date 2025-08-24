@@ -20,7 +20,7 @@ public class Film {
     @NotEmpty
     @NotBlank
     private String name;
-    @Size(min = 0, max = 200)
+    @Size(max = 200)
     private String description;
     @After1895
     private LocalDate releaseDate;
@@ -30,7 +30,7 @@ public class Film {
 
     @Builder.Default
     private List<Genre> genres = new ArrayList<>();
-
+    private List<Director> directors = new ArrayList<>();
     private Mpa mpa;
 
     public Film(String name, String description, LocalDate releaseDate, Integer duration) {
@@ -39,6 +39,5 @@ public class Film {
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        this.genres = new ArrayList<>();
     }
 }
