@@ -11,8 +11,8 @@ import ru.yandex.practicum.filmorate.storage.BaseStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 
 import java.sql.Date;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Qualifier("FilmDbStorage")
@@ -132,8 +132,6 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
             films = findMany(GET_FILMS_BY_DIRECTOR_ID_SORTED_BY_YEARS, directorId);
         } else {
             films = findMany(GET_FILMS_BY_DIRECTOR_ID_SORTED_BY_LIKE, directorId);
-            System.out.println("выполнился запрос");
-            System.out.println(films);
         }
         return films;
     }
