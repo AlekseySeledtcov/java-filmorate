@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.DuplicatedDataException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundFilmException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundReactionException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundReviewException;
@@ -37,19 +36,7 @@ public class ReviewService {
     public Review addReview(Review review) {
         log.debug("Добавление отзыва: {}", review);
 
-        if (review.getContent() == null || review.getContent().trim().isEmpty()) {
-            throw new ValidationException("Содержание отзыва не может быть пустым");
-        }
-        if (review.getIsPositive() == null) {
-            throw new ValidationException("Тип отзыва должен быть указан");
-        }
-        if (review.getUserId() == null) {
-            throw new ValidationException("ID пользователя должен быть указан");
-        }
-        if (review.getFilmId() == null) {
-            throw new ValidationException("ID фильма должен быть указан");
-        }
-
+        validateReview(review);
         validateUserAndFilm(review.getUserId(), review.getFilmId());
 
         if (review.getUseful() == null) {
@@ -75,12 +62,7 @@ public class ReviewService {
             throw new ValidationException("Пользователь может редактировать только свои отзывы");
         }
 
-        if (review.getContent() == null || review.getContent().trim().isEmpty()) {
-            throw new ValidationException("Содержание отзыва не может быть пустым");
-        }
-        if (review.getIsPositive() == null) {
-            throw new ValidationException("Тип отзыва должен быть указан");
-        }
+        validateReview(review);
 
         return reviewStorage.updateReview(review);
     }
@@ -128,7 +110,8 @@ public class ReviewService {
         validateReviewAndUser(reviewId, userId);
 
         if (reviewStorage.hasUserRatedReview(reviewId, userId)) {
-            throw new DuplicatedDataException("Пользователь уже оценил этот отзыв");
+            // Если пользователь уже оценил отзыв, удаляем предыдущую оценку
+            removeReaction(reviewId, userId);
         }
 
         reviewStorage.addLike(reviewId, userId);
@@ -141,7 +124,8 @@ public class ReviewService {
         validateReviewAndUser(reviewId, userId);
 
         if (reviewStorage.hasUserRatedReview(reviewId, userId)) {
-            throw new DuplicatedDataException("Пользователь уже оценил этот отзыв");
+            // Если пользователь уже оценил отзыв, удаляем предыдущую оценку
+            removeReaction(reviewId, userId);
         }
 
         reviewStorage.addDislike(reviewId, userId);
@@ -161,6 +145,24 @@ public class ReviewService {
             reviewStorage.removeLike(reviewId, userId);
         } else {
             reviewStorage.removeDislike(reviewId, userId);
+        }
+    }
+
+    /**
+     * Валидация отзыва
+     */
+    private void validateReview(Review review) {
+        if (review.getContent() == null || review.getContent().trim().isEmpty()) {
+            throw new ValidationException("Содержание отзыва не может быть пустым");
+        }
+        if (review.getIsPositive() == null) {
+            throw new ValidationException("Тип отзыва должен быть указан");
+        }
+        if (review.getUserId() == null) {
+            throw new ValidationException("ID пользователя должен быть указан");
+        }
+        if (review.getFilmId() == null) {
+            throw new ValidationException("ID фильма должен быть указан");
         }
     }
 

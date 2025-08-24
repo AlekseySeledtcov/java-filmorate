@@ -38,11 +38,26 @@ public class Review {
     @Builder.Default
     private Integer useful = 0;
 
-    private LocalDateTime created;
+    @Builder.Default
+    private LocalDateTime created = LocalDateTime.now();
 
     @Builder.Default
     private Set<Long> likes = new HashSet<>();
 
     @Builder.Default
     private Set<Long> dislikes = new HashSet<>();
+
+    /**
+     * Проверяет, поставил ли пользователь лайк отзыву
+     */
+    public boolean hasUserLiked(Long userId) {
+        return likes.contains(userId);
+    }
+
+    /**
+     * Проверяет, поставил ли пользователь дизлайк отзыву
+     */
+    public boolean hasUserDisliked(Long userId) {
+        return dislikes.contains(userId);
+    }
 }

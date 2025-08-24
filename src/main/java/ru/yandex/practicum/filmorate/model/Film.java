@@ -1,6 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,19 +20,29 @@ import java.util.List;
 @Builder
 public class Film {
     private Long id;
+
     @NotEmpty
     @NotBlank
     private String name;
+
     @Size(max = 200)
     private String description;
+
     @After1895
     private LocalDate releaseDate;
+
     @Positive
     private Integer duration;
-    private long likesCount;
+
+    @Builder.Default
+    private long likesCount = 0;
+
     @Builder.Default
     private List<Genre> genres = new ArrayList<>();
+
+    @Builder.Default
     private List<Director> directors = new ArrayList<>();
+
     private Mpa mpa;
 
     public Film(String name, String description, LocalDate releaseDate, Integer duration) {
@@ -38,5 +51,8 @@ public class Film {
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        this.likesCount = 0;
+        this.genres = new ArrayList<>();
+        this.directors = new ArrayList<>();
     }
 }

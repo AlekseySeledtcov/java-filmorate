@@ -35,6 +35,8 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
     private static final String UPDATE_USEFUL_QUERY = "UPDATE reviews SET useful = useful + ? WHERE review_id = ?";
     private static final String HAS_USER_RATED_QUERY = "SELECT COUNT(*) FROM review_likes WHERE review_id = ? AND user_id = ?";
     private static final String IS_LIKE_QUERY = "SELECT is_like FROM review_likes WHERE review_id = ? AND user_id = ?";
+    private static final String GET_REVIEW_LIKES_QUERY = "SELECT user_id FROM review_likes WHERE review_id = ? AND is_like = true";
+    private static final String GET_REVIEW_DISLIKES_QUERY = "SELECT user_id FROM review_likes WHERE review_id = ? AND is_like = false";
 
     @Override
     public Review addReview(Review review) {
@@ -52,6 +54,9 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
         }, keyHolder);
 
         review.setReviewId(keyHolder.getKey().longValue());
+
+        // Загружаем лайки и дизлайки для нового отзыва
+        loadLikesAndDislikes(review);
         return review;
     }
 
@@ -59,7 +64,11 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
     public Review updateReview(Review review) {
         log.debug("Обновление отзыва ID: {}", review.getReviewId());
         update(UPDATE_QUERY, review.getContent(), review.getIsPositive(), review.getReviewId());
-        return review;
+
+        // Загружаем обновленные лайки и дизлайки
+        Review updatedReview = getReviewById(review.getReviewId()).orElse(review);
+        loadLikesAndDislikes(updatedReview);
+        return updatedReview;
     }
 
     @Override
@@ -71,19 +80,25 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
     @Override
     public Optional<Review> getReviewById(long id) {
         log.debug("Получение отзыва по ID: {}", id);
-        return findOne(FIND_BY_ID_QUERY, id);
+        Optional<Review> review = findOne(FIND_BY_ID_QUERY, id);
+        review.ifPresent(this::loadLikesAndDislikes);
+        return review;
     }
 
     @Override
     public List<Review> getReviewsByFilmId(Long filmId, int count) {
         log.debug("Получение {} отзывов для фильма ID: {}", count, filmId);
-        return findMany(FIND_BY_FILM_ID_QUERY, filmId, count);
+        List<Review> reviews = findMany(FIND_BY_FILM_ID_QUERY, filmId, count);
+        reviews.forEach(this::loadLikesAndDislikes);
+        return reviews;
     }
 
     @Override
     public List<Review> getAllReviews(int count) {
         log.debug("Получение всех отзывов (limit: {})", count);
-        return findMany(FIND_ALL_QUERY, count);
+        List<Review> reviews = findMany(FIND_ALL_QUERY, count);
+        reviews.forEach(this::loadLikesAndDislikes);
+        return reviews;
     }
 
     @Override
@@ -124,7 +139,29 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
     @Override
     public boolean isLike(long reviewId, long userId) {
         log.debug("Проверка типа оценки отзыва ID: {} пользователем ID: {}", reviewId, userId);
-        Boolean isLike = jdbc.queryForObject(IS_LIKE_QUERY, Boolean.class, reviewId, userId);
-        return isLike != null && isLike;
+        try {
+            Boolean isLike = jdbc.queryForObject(IS_LIKE_QUERY, Boolean.class, reviewId, userId);
+            return isLike != null && isLike;
+        } catch (Exception e) {
+            log.warn("Ошибка при проверке типа оценки: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Загружает лайки и дизлайки для отзыва
+     */
+    private void loadLikesAndDislikes(Review review) {
+        if (review == null) return;
+
+        // Загружаем лайки
+        List<Long> likes = jdbc.query(GET_REVIEW_LIKES_QUERY,
+                (rs, rowNum) -> rs.getLong("user_id"), review.getReviewId());
+        review.getLikes().addAll(likes);
+
+        // Загружаем дизлайки
+        List<Long> dislikes = jdbc.query(GET_REVIEW_DISLIKES_QUERY,
+                (rs, rowNum) -> rs.getLong("user_id"), review.getReviewId());
+        review.getDislikes().addAll(dislikes);
     }
 }
