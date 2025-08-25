@@ -60,6 +60,8 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
             "WHERE director_id=? " +
             "GROUP BY f.id " +
             "ORDER BY like_count DESC";
+    private static final String GET_FILMS_SEARCH_BY_DIRECTOR = "SELECT f.id, f.name, f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name FROM FILM AS f JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id JOIN film_director AS fd ON fd.film_id=f.id JOIN director AS d ON fd.director_id=d.id WHERE LOWER (d.name) LIKE ?";
+    private static final String GET_FILMS_SEARCH_BY_TITLE = "SELECT f.id, f.name, f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name FROM FILM AS f JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id WHERE LOWER (f.name) LIKE ?";
 
 
     @Override
@@ -162,5 +164,17 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                 " JOIN like_list ll ON f.id = ll.film_id " +
                 " WHERE ll.user_id = ?";
         return findMany(query, userId);
+    }
+
+    @Override
+    public List<Film> getFilmsSearchByDirector(String query) {
+        log.debug("FilmDbStorage. getFilmsSearchByDirector query={}", query);
+        return findMany(GET_FILMS_SEARCH_BY_DIRECTOR, query);
+    }
+
+    @Override
+    public List<Film> getFilmsSearchByTitle(String query) {
+        log.debug("FilmDbStorage. getFilmsSearchByTitle query={}", query);
+        return findMany(GET_FILMS_SEARCH_BY_TITLE, query);
     }
 }
