@@ -26,4 +26,6 @@ public interface FilmStorage {
 
     List<Film> getFilmsLikedByUser(long userId);
 
+    boolean deleteFilm(long id);
+
 }

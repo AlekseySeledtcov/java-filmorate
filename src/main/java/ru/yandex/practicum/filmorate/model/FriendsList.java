@@ -10,9 +10,8 @@ import lombok.Setter;
 public class FriendsList {
     private long userId;
     private long friendId;
-    private String status; // PENDING или CONFIRMED
+    private String status;
 
-    // Добавляем геттер для статуса, который используется в методе getFriendshipStatus
     public String getStatus() {
         return status;
     }

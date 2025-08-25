@@ -60,7 +60,7 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
     @Override
     public void deleteDirector(long id) {
         log.debug("DirectorDbStorage. deleteDirector id={}", id);
-        update(DELETE_DIRECTOR_BY_ID_QUERY, id);
+        jdbc.update(DELETE_DIRECTOR_BY_ID_QUERY, id);
     }
 
     @Override

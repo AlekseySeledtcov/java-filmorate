@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.DuplicatedDataException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundFilmException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundReactionException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundReviewException;
@@ -127,10 +126,6 @@ public class ReviewService {
     public void addLike(long reviewId, long userId) {
         validateReviewAndUser(reviewId, userId);
 
-        if (reviewStorage.hasUserRatedReview(reviewId, userId)) {
-            throw new DuplicatedDataException("Пользователь уже оценил этот отзыв");
-        }
-
         reviewStorage.addLike(reviewId, userId);
     }
 
@@ -139,10 +134,6 @@ public class ReviewService {
      */
     public void addDislike(long reviewId, long userId) {
         validateReviewAndUser(reviewId, userId);
-
-        if (reviewStorage.hasUserRatedReview(reviewId, userId)) {
-            throw new DuplicatedDataException("Пользователь уже оценил этот отзыв");
-        }
 
         reviewStorage.addDislike(reviewId, userId);
     }

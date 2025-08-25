@@ -29,6 +29,7 @@ public class Film {
     private long likesCount;
     @Builder.Default
     private List<Genre> genres = new ArrayList<>();
+    @Builder.Default
     private List<Director> directors = new ArrayList<>();
     private Mpa mpa;
 
