@@ -137,6 +137,25 @@ public class FilmService {
         return films;
     }
 
+    public List<Film> getCommonFilms(long userId, long friendId) {
+        log.debug("FilmService. Получение общих фильмов для userId={} и friendId={}", userId, friendId);
+
+        if (!userStorage.containsUserById(userId)) {
+            throw new NotFoundUserByIdException("Пользователь не найден", userId);
+        }
+        if (!userStorage.containsUserById(friendId)) {
+            throw new NotFoundUserByIdException("Друг не найден", friendId);
+        }
+
+        List<Film> commonFilms = filmStorage.getCommonFilms(userId, friendId);
+
+        commonFilms.forEach(this::addData);
+
+        commonFilms.sort(Comparator.comparingLong(Film::getLikesCount).reversed());
+
+        return commonFilms;
+    }
+
     private Film addData(Film film) {
         film.setGenres(genreService.getGenresByFilmId(film.getId()));
         film.setDirectors(directorService.getDirectorsByFilmId(film.getId()));

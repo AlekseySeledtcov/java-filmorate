@@ -60,6 +60,30 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
             "WHERE director_id=? " +
             "GROUP BY f.id " +
             "ORDER BY like_count DESC";
+    private static final String GET_FILMS_LIKED_BY_USER_QUERY =
+            "SELECT f.id, f.name, f.description, f.releasedate, f.duration, mr.mpa_id, mr.mpa_name " +
+                    "FROM film f " +
+                    "JOIN mpa_rating mr ON f.rating_id = mr.mpa_id " +
+                    "JOIN like_list ll ON f.id = ll.film_id " +
+                    "WHERE ll.user_id = ?";
+    private static final String GET_COMMON_FILMS_QUERY =
+            "SELECT f.id, f.name, f.description, f.releasedate, f.duration, " +
+                    "mr.mpa_id, mr.mpa_name, COUNT(ll.film_id) AS like_count " +
+                    "FROM film f " +
+                    "JOIN mpa_rating mr ON f.rating_id = mr.mpa_id " +
+                    "JOIN like_list ll ON f.id = ll.film_id " +
+                    "WHERE f.id IN (" +
+                    "    SELECT l1.film_id " +
+                    "    FROM like_list l1 " +
+                    "    JOIN like_list l2 ON l1.film_id = l2.film_id " +
+                    "    WHERE l1.user_id = ? AND l2.user_id = ?" +
+                    ") " +
+                    "GROUP BY f.id " +
+                    "ORDER BY like_count DESC";
+
+    public long getLikeListsByFilmId(long id) {
+        return likeStorage.getLikeListsByFilmId(id).size();
+    }
 
 
     @Override
@@ -136,24 +160,6 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         return films;
     }
 
-    public long getLikeListsByFilmId(long id) {
-        return likeStorage.getLikeListsByFilmId(id).size();
-    }
-
-    private static final String GET_FILMS_LIKED_BY_USER_QUERY =
-            "SELECT f.id, f.name, f.description, f.releasedate, f.duration, mr.mpa_id, mr.mpa_name " +
-                    "FROM film f " +
-                    "JOIN mpa_rating mr ON f.rating_id = mr.mpa_id " +
-                    "JOIN like_list ll ON f.id = ll.film_id " +
-                    "WHERE ll.user_id = ?";
-
-    private static final String GET_FILMS_NOT_LIKED_BY_USER_QUERY =
-            "SELECT f.id, f.name, f.description, f.releasedate, f.duration, mr.mpa_id, mr.mpa_name " +
-                    "FROM film f " +
-                    "JOIN mpa_rating mr ON f.rating_id = mr.mpa_id " +
-                    "WHERE f.id NOT IN (" +
-                    "    SELECT film_id FROM like_list WHERE user_id = ?" +
-                    ")";
 
     @Override
     public List<Film> getFilmsLikedByUser(long userId) {
@@ -162,5 +168,11 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                 " JOIN like_list ll ON f.id = ll.film_id " +
                 " WHERE ll.user_id = ?";
         return findMany(query, userId);
+    }
+
+    @Override
+    public List<Film> getCommonFilms(long userId, long friendId) {
+        log.debug("FilmDbStorage. Получение общих фильмов для userId={} и friendId={}", userId, friendId);
+        return findMany(GET_COMMON_FILMS_QUERY, userId, friendId);
     }
 }
