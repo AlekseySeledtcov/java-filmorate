@@ -133,6 +133,7 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
         updateUsefulField(reviewId);
     }
 
+
     @Override
     public void removeLike(long reviewId, long userId) {
         log.debug("Удаление лайка отзыву ID: {} от пользователя ID: {}", reviewId, userId);

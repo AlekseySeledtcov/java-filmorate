@@ -30,7 +30,7 @@ public class ReviewController {
     @PostMapping
     public Review addReview(@Valid @RequestBody Review review) {
         log.debug("POST /reviews - добавление нового отзыва");
-        return reviewService.addReview(review);
+        return reviewService.addReviewWithEvent(review);
     }
 
     /**
@@ -39,7 +39,7 @@ public class ReviewController {
     @PutMapping
     public Review updateReview(@Valid @RequestBody Review review) {
         log.debug("PUT /reviews - обновление отзыва ID: {}", review.getReviewId());
-        return reviewService.updateReview(review);
+        return reviewService.updateReviewWithEvent(review);
     }
 
     /**
@@ -48,7 +48,7 @@ public class ReviewController {
     @DeleteMapping("/{id}")
     public void deleteReview(@PathVariable long id) {
         log.debug("DELETE /reviews/{} - удаление отзыва", id);
-        reviewService.deleteReview(id);
+        reviewService.deleteReviewWithEvent(id);
     }
 
     /**

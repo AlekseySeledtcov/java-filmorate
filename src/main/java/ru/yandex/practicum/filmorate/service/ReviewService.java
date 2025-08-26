@@ -3,12 +3,16 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.DuplicatedDataException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundFilmException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundReactionException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundReviewException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByIdException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -21,13 +25,16 @@ public class ReviewService {
     private final ReviewStorage reviewStorage;
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
+    private final EventService eventService;
 
     public ReviewService(ReviewStorage reviewStorage,
                          @Qualifier("UserDbStorage") UserStorage userStorage,
-                         @Qualifier("FilmDbStorage") FilmStorage filmStorage) {
+                         @Qualifier("FilmDbStorage") FilmStorage filmStorage,
+                         EventService eventService) {
         this.reviewStorage = reviewStorage;
         this.userStorage = userStorage;
         this.filmStorage = filmStorage;
+        this.eventService = eventService;
     }
 
     /**
@@ -125,7 +132,9 @@ public class ReviewService {
      */
     public void addLike(long reviewId, long userId) {
         validateReviewAndUser(reviewId, userId);
-
+        if (reviewStorage.hasUserRatedReview(reviewId, userId)) {
+            log.debug("Пользователь {} уже оценил отзыв {} — будет переключение на дизлайк", userId, reviewId);
+        }
         reviewStorage.addLike(reviewId, userId);
     }
 
@@ -134,7 +143,9 @@ public class ReviewService {
      */
     public void addDislike(long reviewId, long userId) {
         validateReviewAndUser(reviewId, userId);
-
+        if (reviewStorage.hasUserRatedReview(reviewId, userId)) {
+            log.debug("Пользователь {} уже оценил отзыв {} — будет переключение на дизлайк", userId, reviewId);
+        }
         reviewStorage.addDislike(reviewId, userId);
     }
 
@@ -184,5 +195,53 @@ public class ReviewService {
         if (!userStorage.containsUserById(userId)) {
             throw new NotFoundUserByIdException("Пользователь с ID " + userId + " не найден", userId);
         }
+    }
+
+    public Review addReviewWithEvent(Review review) {
+        Review createdReview = addReview(review);
+
+        Event event = Event.builder()
+                .userId(createdReview.getUserId())
+                .entityId(createdReview.getReviewId())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.ADD)
+                .build();
+
+        log.debug("Добавление события в ленту: {}", event);
+        eventService.addEvent(event);
+
+        return createdReview;
+    }
+
+    public Review updateReviewWithEvent(Review review) {
+        Review updatedReview = updateReview(review);
+
+        Event event = Event.builder()
+                .userId(updatedReview.getUserId())
+                .entityId(updatedReview.getReviewId())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.UPDATE)
+                .build();
+
+        log.debug("Добавление события в ленту после обновления отзыва: {}", event);
+        eventService.addEvent(event);
+
+        return updatedReview;
+    }
+
+    public void deleteReviewWithEvent(long reviewId) {
+        Review review = getReviewById(reviewId);
+
+        deleteReview(reviewId);
+
+        Event event = Event.builder()
+                .userId(review.getUserId())
+                .entityId(review.getReviewId())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.REMOVE)
+                .build();
+
+        log.info("Создаём событие удаления отзыва с operation = {}", event.getOperation());
+        eventService.addEvent(event);
     }
 }
