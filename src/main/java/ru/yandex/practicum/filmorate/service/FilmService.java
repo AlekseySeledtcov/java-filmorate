@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -50,6 +51,9 @@ public class FilmService {
 
         if (!film.getGenres().isEmpty()) {
             genreService.putGenre(film.getGenres(), film.getId());
+        }
+        if (!film.getDirectors().isEmpty()) {
+            directorService.putDirectorsToFilm(film.getDirectors(), film.getId());
         }
         return film;
     }
@@ -137,6 +141,30 @@ public class FilmService {
         return films;
     }
 
+    public List<Film> getFilmsSearch(String query, String by) {
+
+        List<Film> films = new ArrayList<>();
+        String[] byArr = by.replaceAll("\\s+", "").split(",");
+
+        for (String s : byArr) {
+            if (s.equals("director")) {
+                films.addAll(filmStorage.getFilmsSearchByDirector("%" + query.toLowerCase() + "%"));
+            }
+            if (s.equals("title")) {
+                films.addAll(filmStorage.getFilmsSearchByTitle("%" + query.toLowerCase() + "%"));
+            }
+        }
+
+        if (!films.isEmpty()) {
+            films.forEach(this::addData);
+        }
+
+        return films.stream()
+                .distinct()
+                .sorted(Comparator.comparing(Film::getLikesCount))
+                .toList();
+    }
+
     public List<Film> getCommonFilms(long userId, long friendId) {
         log.debug("FilmService. Получение общих фильмов для userId={} и friendId={}", userId, friendId);
 
@@ -159,6 +187,7 @@ public class FilmService {
     private Film addData(Film film) {
         film.setGenres(genreService.getGenresByFilmId(film.getId()));
         film.setDirectors(directorService.getDirectorsByFilmId(film.getId()));
+        film.setLikesCount(filmStorage.getLikeListsByFilmId(film.getId()));
         return film;
     }
 }

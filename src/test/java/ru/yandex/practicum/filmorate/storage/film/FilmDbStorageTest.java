@@ -7,10 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
@@ -29,6 +27,8 @@ class FilmDbStorageTest {
     private final FilmDbStorage filmStorage;
     private final LikeStorage likeStorage;
     private final UserService userService;
+    private final DirectorService directorService;
+
     private Film newFilm1;
     private Film newFilm2;
     private User newUser1;
@@ -42,6 +42,7 @@ class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2025, 07, 22))
                 .duration(90)
                 .genres(List.of(new Genre(1, "Комедия")))
+                .directors(List.of(new Director(1, "Квентин Тарантино")))
                 .mpa(new Mpa(1, "G"))
                 .build();
 
@@ -51,6 +52,7 @@ class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2025, 07, 23))
                 .duration(100)
                 .genres(List.of(new Genre(2, "Драма")))
+                .directors(List.of(new Director(1, "Квентин Тарантино")))
                 .mpa(new Mpa(5, "NC-17"))
                 .build();
 
@@ -67,6 +69,8 @@ class FilmDbStorageTest {
                 .login("4UFuPkNVbG")
                 .birthday(LocalDate.of(2004, 06, 9))
                 .build();
+
+        directorService.postDirector(new Director("Квентин Тарантино"));
     }
 
     @Test
