@@ -13,4 +13,8 @@ public interface LikeStorage {
     boolean containsLike(long userId, long filmId);
 
     List<Like> getLikeListsByFilmId(long filmId);
+
+    void deleteAllLikesForFilm(long filmId);
+
+    void deleteAllLikesForUser(long userId);
 }

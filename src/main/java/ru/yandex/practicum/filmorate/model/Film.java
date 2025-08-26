@@ -1,9 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,7 +32,6 @@ public class Film {
 
     @Builder.Default
     private List<Genre> genres = new ArrayList<>();
-
     @Builder.Default
     private List<Director> directors = new ArrayList<>();
     private Mpa mpa;
@@ -46,8 +42,5 @@ public class Film {
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        this.likesCount = 0;
-        this.genres = new ArrayList<>();
-        this.directors = new ArrayList<>();
     }
 }

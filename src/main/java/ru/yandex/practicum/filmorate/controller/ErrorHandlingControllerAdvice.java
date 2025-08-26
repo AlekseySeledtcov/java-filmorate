@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -13,7 +14,17 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-import ru.yandex.practicum.filmorate.exceptions.*;
+import ru.yandex.practicum.filmorate.exceptions.DuplicatedDataException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundEntityByIdException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundFilmException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundFriendshipException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundGenreException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundMpaException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundReactionException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundReviewException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByFriendIdException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByIdException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.ErrorResponse;
 import ru.yandex.practicum.filmorate.model.ValidationErrorResponse;
 import ru.yandex.practicum.filmorate.model.Violation;
@@ -164,5 +175,20 @@ public class ErrorHandlingControllerAdvice {
                 "Проверьте формат JSON и наличие обязательных полей");
     }
 
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    @ResponseBody
+    public ErrorResponse handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        log.warn("Метод не поддерживается: {}", ex.getMessage());
+        return new ErrorResponse("Метод не поддерживается",
+                "Метод " + ex.getMethod() + " не поддерживается для данного endpoint");
+    }
 
+    @ExceptionHandler(DuplicatedDataException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseBody
+    public ErrorResponse duplicatedDataException(final DuplicatedDataException exception) {
+        log.warn("Конфликт данных: {}", exception.getMessage());
+        return new ErrorResponse("Конфликт данных", exception.getMessage());
+    }
 }

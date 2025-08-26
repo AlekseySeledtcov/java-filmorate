@@ -2,7 +2,14 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -62,11 +69,22 @@ public class UserController {
         return userService.getUsersCommonFriendList(id, otherId);
     }
 
-    // Новый эндпоинт для подтверждения дружбы
     @PutMapping("/{id}/friends/{friendId}/confirm")
     public void confirmFriendship(@PathVariable("id") long id,
                                   @PathVariable("friendId") long friendId) {
         log.debug("Контроллер. Подтверждение дружбы между {} и {}", id, friendId);
         userService.confirmFriendship(id, friendId);
+    }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable long userId) {
+        log.debug("Контроллер. Удаление пользователя с id {}", userId);
+        userService.deleteUser(userId);
+    }
+
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable long id) {
+        log.debug("Контроллер. Получение пользователя по id {}", id);
+        return userService.getUserById(id);
     }
 }

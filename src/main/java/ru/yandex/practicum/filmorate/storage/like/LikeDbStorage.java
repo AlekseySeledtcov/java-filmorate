@@ -11,7 +11,7 @@ import java.util.List;
 
 @Slf4j
 @Repository
-public class LikeDbStorage extends BaseStorage implements LikeStorage {
+public class LikeDbStorage extends BaseStorage<Like> implements LikeStorage {
 
     public LikeDbStorage(JdbcTemplate jdbc, RowMapper<Like> mapper) {
         super(jdbc, mapper, Like.class);
@@ -21,11 +21,13 @@ public class LikeDbStorage extends BaseStorage implements LikeStorage {
     private static final String DELETE_LIKE_QUERY = "DELETE FROM like_list WHERE film_id = ? AND user_id = ?";
     private static final String GET_LIKE_BY_ID_QUERY = "SELECT * FROM like_list WHERE film_id = ? AND user_id = ?";
     private static final String GET_LIKELIST_BY_FILM_ID = "SELECT * FROM like_list WHERE film_id = ?";
+    private static final String DELETE_ALL_LIKES_FOR_FILM_QUERY = "DELETE FROM like_list WHERE film_id = ?";
+    private static final String DELETE_ALL_LIKES_FOR_USER_QUERY = "DELETE FROM like_list WHERE user_id = ?";
 
     @Override
     public void putLike(long userId, long filmId) {
         log.debug("Хранилище. putLike userId {}, filmId {}", userId, filmId);
-        update(PUT_LIKE_QUERY, filmId, userId);
+        jdbc.update(PUT_LIKE_QUERY, filmId, userId);
     }
 
     @Override
@@ -36,11 +38,25 @@ public class LikeDbStorage extends BaseStorage implements LikeStorage {
 
     public void deleteLike(long filmId, long userId) {
         log.debug("Хранилище. deleteLike filmId {}, userId {}", filmId, userId);
-        update(DELETE_LIKE_QUERY, filmId, userId);
+        jdbc.update(DELETE_LIKE_QUERY, filmId, userId);
     }
 
     public List<Like> getLikeListsByFilmId(long filmId) {
         log.debug("Хранилище. getLikeListsByFilmId filmId {}", filmId);
         return findMany(GET_LIKELIST_BY_FILM_ID, filmId);
+    }
+
+    @Override
+    public void deleteAllLikesForFilm(long filmId) {
+        log.debug("Хранилище. deleteAllLikesForFilm filmId {}", filmId);
+        // ЗАМЕНА: используем jdbc.update вместо BaseStorage.update
+        jdbc.update(DELETE_ALL_LIKES_FOR_FILM_QUERY, filmId);
+    }
+
+    @Override
+    public void deleteAllLikesForUser(long userId) {
+        log.debug("Хранилище. deleteAllLikesForUser userId {}", userId);
+        // ЗАМЕНА: используем jdbc.update вместо BaseStorage.update
+        jdbc.update(DELETE_ALL_LIKES_FOR_USER_QUERY, userId);
     }
 }

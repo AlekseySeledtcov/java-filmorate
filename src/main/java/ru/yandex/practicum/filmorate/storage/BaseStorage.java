@@ -52,9 +52,8 @@ public class BaseStorage<T> {
     }
 
     protected void update(String query, Object... params) {
-        int rowsUpdated = jdbc.update(query, params);
-        if (rowsUpdated == 0) {
-            throw new InternalServerException("Не удалось обновить данные");
-        }
+        jdbc.update(query, params);
+        // Просто выполняем запрос без проверки не должен бросать исключение при 0 обновленных строках,
+        // так как это нормальная ситуация для DELETE
     }
 }

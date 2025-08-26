@@ -30,6 +30,8 @@ public class FriendListDbStorage extends BaseStorage<FriendsList> implements Fri
             "AND status = ?";
     private static final String CONFIRM_ALL_FRIENDSHIPS_QUERY =
             "UPDATE friends_list SET status = 'CONFIRMED' WHERE status = 'PENDING'";
+    private static final String DELETE_ALL_FRIENDS_FOR_USER_QUERY = "DELETE FROM friends_list WHERE user_id = ? " +
+            "OR friend_id = ?";
 
 
     @Override
@@ -59,5 +61,12 @@ public class FriendListDbStorage extends BaseStorage<FriendsList> implements Fri
     public List<FriendsList> getFriendsWithStatus(long userId, String status) {
         log.debug("Хранилище. Получение друзей пользователя {} со статусом {}", userId, status);
         return findMany(GET_FRIENDS_WITH_STATUS_QUERY, userId, status);
+    }
+
+    @Override
+    public void deleteAllFriendsForUser(long userId) {
+        log.debug("Хранилище. deleteAllFriendsForUser userId {}", userId);
+        // ЗАМЕНА: используем jdbc.update вместо BaseStorage.update
+        jdbc.update(DELETE_ALL_FRIENDS_FOR_USER_QUERY, userId, userId);
     }
 }

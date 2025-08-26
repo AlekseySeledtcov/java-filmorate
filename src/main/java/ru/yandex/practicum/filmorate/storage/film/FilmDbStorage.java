@@ -30,9 +30,8 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         this.mpaService = mpaService;
     }
 
-    private static final String BASE_QUERY = "SELECT f.id, f.name, f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name " +
-            "FROM film AS f " +
-            "JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id ";
+    private static final String BASE_QUERY = "SELECT f.id, f.name, f.description, f.releasedate,f.duration," +
+            " mr.mpa_id, mr.mpa_name FROM film AS f JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id ";
     private static final String FIND_ALL_QUERY = BASE_QUERY;
     private static final String CONTAINS_BY_ID_QUERY = "SELECT COUNT(*) FROM film WHERE id = ?";
     private static final String CONTAINS_BY_NAME_QUERY = "SELECT COUNT(*) FROM film WHERE name = ?";
@@ -41,12 +40,17 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     private static final String FIND_BY_ID_QUERY = BASE_QUERY + "WHERE id=?";
     private static final String UPDATE_QUERY = "UPDATE film SET name = ?, description = ?, " +
             "releaseDate = ?, duration = ?, rating_id = ? WHERE id = ?";
-    private static final String GET_POPULAR_FILMS_QUERY = "SELECT f.id, f.name, f.description, f.releasedate," +
-            "f.duration, mr.mpa_id, mr.mpa_name, COUNT (ll.film_id) AS like_count " +
-            "FROM film AS f " +
-            "JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id " +
-            "JOIN like_list AS ll ON f.id=ll.film_id " +
-            "GROUP BY ll.film_id LIMIT ?";
+
+    private static final String GET_POPULAR_FILMS_QUERY =
+            "SELECT f.id, f.name, f.description, f.releasedate, f.duration, " +
+                    "mr.mpa_id, mr.mpa_name, COUNT(ll.film_id) AS like_count " +
+                    "FROM film AS f " +
+                    "JOIN mpa_rating AS mr ON f.rating_id = mr.mpa_id " +
+                    "LEFT JOIN like_list AS ll ON f.id = ll.film_id " + // LEFT JOIN вместо JOIN
+                    "GROUP BY f.id, f.name, f.description, f.releasedate, f.duration, mr.mpa_id, mr.mpa_name " +
+                    "ORDER BY like_count DESC " +
+                    "LIMIT ?";
+
     private static final String GET_FILMS_BY_DIRECTOR_ID_SORTED_BY_YEARS = BASE_QUERY +
             "JOIN film_director AS fd ON f.id=fd.film_id " +
             "WHERE director_id=? " +
@@ -55,11 +59,12 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
             "f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name, COUNT(ll.film_id) AS like_count " +
             "FROM film AS f " +
             "JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id " +
-            "JOIN like_list as ll ON f.id=ll.film_id " +
+            "LEFT JOIN like_list as ll ON f.id=ll.film_id " +
             "JOIN film_director AS fd ON f.id=fd.film_id " +
             "WHERE director_id=? " +
-            "GROUP BY f.id " +
+            "GROUP BY f.id, f.name, f.description, f.releasedate, f.duration, mr.mpa_id, mr.mpa_name " +
             "ORDER BY like_count DESC";
+    private static final String DELETE_FILM_QUERY = "DELETE FROM film WHERE id = ?";
     private static final String GET_FILMS_SEARCH_BY_DIRECTOR = "SELECT f.id, f.name, f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name FROM FILM AS f JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id JOIN film_director AS fd ON fd.film_id=f.id JOIN director AS d ON fd.director_id=d.id WHERE LOWER (d.name) LIKE ?";
     private static final String GET_FILMS_SEARCH_BY_TITLE = "SELECT f.id, f.name, f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name FROM FILM AS f JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id WHERE LOWER (f.name) LIKE ?";
     private static final String GET_FILMS_LIKED_BY_USER_QUERY =
@@ -206,5 +211,13 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     public List<Film> getCommonFilms(long userId, long friendId) {
         log.debug("FilmDbStorage. Получение общих фильмов для userId={} и friendId={}", userId, friendId);
         return findMany(GET_COMMON_FILMS_QUERY, userId, friendId);
+    }
+
+
+    @Override
+    public boolean deleteFilm(long id) {
+        log.debug("FilmDbStorage. deleteFilm Удаление фильма с id {}", id);
+        int rowsDeleted = jdbc.update(DELETE_FILM_QUERY, id);
+        return rowsDeleted > 0;
     }
 }

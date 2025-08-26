@@ -29,4 +29,10 @@ public interface ReviewStorage {
     boolean hasUserRatedReview(long reviewId, long userId);
 
     boolean isLike(long reviewId, long userId);
+
+    void deleteReviewsByUserId(long userId);
+
+    void deleteReviewsByFilmId(long filmId);
+
+    void deleteReviewRatingsByUserId(long userId);
 }

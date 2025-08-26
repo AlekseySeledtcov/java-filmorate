@@ -3,13 +3,17 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.*;
+import ru.yandex.practicum.filmorate.exceptions.DuplicatedDataException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundFilmException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByIdException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
+import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
@@ -29,6 +33,8 @@ public class FilmService {
     private final LikeStorage likeStorage;
     private final GenreService genreService;
     private final DirectorService directorService;
+    private final ReviewStorage reviewStorage;
+    private final JdbcTemplate jdbc;
 
     public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
                        @Qualifier("UserDbStorage") UserStorage userStorage,
@@ -36,7 +42,9 @@ public class FilmService {
                        GenreStorage genreStorage,
                        LikeStorage likeStorage,
                        GenreService genreService,
-                       DirectorService directorService) {
+                       DirectorService directorService,
+                       ReviewStorage reviewStorage,
+                       JdbcTemplate jdbc) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.mpaStorage = mpaStorage;
@@ -44,6 +52,8 @@ public class FilmService {
         this.likeStorage = likeStorage;
         this.genreService = genreService;
         this.directorService = directorService;
+        this.reviewStorage = reviewStorage;
+        this.jdbc = jdbc;
     }
 
     public Film addFilm(Film film) {
@@ -52,9 +62,9 @@ public class FilmService {
         if (!film.getGenres().isEmpty()) {
             genreService.putGenre(film.getGenres(), film.getId());
         }
-        if (!film.getDirectors().isEmpty()) {
-            directorService.putDirectorsToFilm(film.getDirectors(), film.getId());
-        }
+        //if (!film.getDirectors().isEmpty()) {
+        //    directorService.putDirectorsToFilm(film.getDirectors(), film.getId());
+        //}
         return film;
     }
 
@@ -182,6 +192,25 @@ public class FilmService {
         commonFilms.sort(Comparator.comparingLong(Film::getLikesCount).reversed());
 
         return commonFilms;
+    }
+
+    public void deleteFilm(long id) {
+        log.debug("Сервис. deleteFilm Удаление фильма с id {}", id);
+
+        if (!filmStorage.containsFilmById(id)) {
+            throw new NotFoundFilmException("Не найден фильм для удаления по id ", id);
+        }
+
+        likeStorage.deleteAllLikesForFilm(id);
+        genreService.deleteGenre(id);
+        directorService.deleteDirectorsFromFilm(id);
+        reviewStorage.deleteReviewsByFilmId(id);
+
+        boolean wasDeleted = filmStorage.deleteFilm(id);
+        if (!wasDeleted) {
+            throw new NotFoundFilmException("Не удалось удалить фильм по id ", id);
+        }
+        log.debug("Фильм с id {} успешно удален: {}", id, wasDeleted);
     }
 
     private Film addData(Film film) {

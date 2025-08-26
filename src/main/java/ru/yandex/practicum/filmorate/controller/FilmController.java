@@ -4,7 +4,15 @@ import jakarta.validation.Valid;
 
 import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -24,7 +32,6 @@ public class FilmController {
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
         log.debug("FilmController. Запрос на добавление фильма {}", film.getName());
-        System.out.println(film);
         return filmService.addFilm(film);
     }
 
@@ -70,6 +77,11 @@ public class FilmController {
         return filmService.getFilmsByDirectorSorted(directorId, sortBy);
     }
 
+    @DeleteMapping("/{filmId}")
+    public void deleteFilm(@PathVariable long filmId) {
+        log.debug("Контроллер. Удаление фильма с id {}", filmId);
+        filmService.deleteFilm(filmId);
+    }
     @GetMapping("/search")
     public List<Film> getFilmsSearch(@RequestParam("query") String query,
                                      @RequestParam("by") String by) {
