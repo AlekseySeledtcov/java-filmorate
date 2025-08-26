@@ -59,6 +59,6 @@ public class GenreBdStorage extends BaseStorage<Genre> implements GenreStorage {
     @Override
     public void deleteGenre(long filmId) {
         log.debug("GenreBdStorage. deleteGenre filmid {}", filmId);
-        update(DELETE_GENRE_BY_FILM_ID_QUERY, filmId);
+        jdbc.update(DELETE_GENRE_BY_FILM_ID_QUERY, filmId);
     }
 }

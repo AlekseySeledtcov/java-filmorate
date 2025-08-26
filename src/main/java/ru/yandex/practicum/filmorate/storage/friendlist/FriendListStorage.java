@@ -16,4 +16,6 @@ public interface FriendListStorage {
 
     List<FriendsList> getFriendsWithStatus(long userId, String status);
 
+    void deleteAllFriendsForUser(long userId);
+
 }

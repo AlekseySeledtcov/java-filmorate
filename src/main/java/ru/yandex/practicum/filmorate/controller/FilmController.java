@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-
 import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +23,6 @@ public class FilmController {
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
         log.debug("FilmController. Запрос на добавление фильма {}", film.getName());
-        System.out.println(film);
         return filmService.addFilm(film);
     }
 
@@ -77,4 +75,9 @@ public class FilmController {
         return filmService.getFilmsSearch(query, by);
     }
 
+    @DeleteMapping("/{filmId}")
+    public void deleteFilm(@PathVariable long filmId) {
+        log.debug("Контроллер. Удаление фильма с id {}", filmId);
+        filmService.deleteFilm(filmId);
+    }
 }

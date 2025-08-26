@@ -26,6 +26,8 @@ public interface FilmStorage {
 
     List<Film> getFilmsLikedByUser(long userId);
 
+    boolean deleteFilm(long id);
+
     List<Film> getCommonFilms(long userId, long friendId);
 
     List<Film> getFilmsSearchByDirector(String query);

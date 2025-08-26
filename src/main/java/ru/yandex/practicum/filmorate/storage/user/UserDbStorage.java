@@ -28,7 +28,7 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
     private static final String FIND_BY_EMAIL_QUERY = "SELECT * FROM users WHERE email = ?";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE id = ?";
     private static final String UPDATE_QUERY = "UPDATE users SET name = ?, login = ?, " +
-            "email = ?, birthday = ?";
+            "email = ?, birthday = ? WHERE id = ?";
     private static final String CONTAINS_BY_ID_QUERY = " SELECT COUNT(*) FROM users WHERE id = ?";
     private static final String CONTAINS_BY_EMAIL_QUERY = " SELECT COUNT(*) FROM users WHERE email = ?";
     private static final String FIND_ALL_QUERY = "SELECT * FROM users";
@@ -36,12 +36,12 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
             "SELECT u.* FROM users AS u " +
                     "JOIN friends_list AS fl ON u.id = fl.friend_id " +
                     "WHERE fl.user_id = ? AND fl.status = 'CONFIRMED'";
-
     private static final String FIND_COMMON_FRIENDS_BY_USER_ID_QUERY =
             "SELECT u.* FROM users AS u " +
                     "JOIN friends_list AS f1 ON u.id = f1.friend_id AND f1.status = 'CONFIRMED' " +
                     "JOIN friends_list AS f2 ON u.id = f2.friend_id AND f2.status = 'CONFIRMED' " +
                     "WHERE f1.user_id = ? AND f2.user_id = ?";
+    private static final String DELETE_USER_QUERY = "DELETE FROM users WHERE id = ?";
 
     @Override
     public User addUser(User user) {
@@ -65,7 +65,8 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
                 user.getName(),
                 user.getLogin(),
                 user.getEmail(),
-                user.getBirthday()
+                Date.valueOf(user.getBirthday()),
+                user.getId()
         );
         return user;
     }
@@ -142,5 +143,12 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
         String query = String.format("SELECT * FROM users WHERE id IN (%s)", placeholders);
 
         return findMany(query, userIds.toArray());
+    }
+
+    @Override
+    public boolean deleteUser(long id) {
+        log.debug("Хранилище. deleteUser Удаление пользователя с id {}", id);
+        int rowsDeleted = jdbc.update(DELETE_USER_QUERY, id);
+        return rowsDeleted > 0;
     }
 }

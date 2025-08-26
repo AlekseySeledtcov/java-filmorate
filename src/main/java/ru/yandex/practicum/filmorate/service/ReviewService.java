@@ -36,7 +36,19 @@ public class ReviewService {
     public Review addReview(Review review) {
         log.debug("Добавление отзыва: {}", review);
 
-        validateReview(review);
+        if (review.getContent() == null || review.getContent().trim().isEmpty()) {
+            throw new ValidationException("Содержание отзыва не может быть пустым");
+        }
+        if (review.getIsPositive() == null) {
+            throw new ValidationException("Тип отзыва должен быть указан");
+        }
+        if (review.getUserId() == null) {
+            throw new ValidationException("ID пользователя должен быть указан");
+        }
+        if (review.getFilmId() == null) {
+            throw new ValidationException("ID фильма должен быть указан");
+        }
+
         validateUserAndFilm(review.getUserId(), review.getFilmId());
 
         if (review.getUseful() == null) {
@@ -62,7 +74,12 @@ public class ReviewService {
             throw new ValidationException("Пользователь может редактировать только свои отзывы");
         }
 
-        validateReview(review);
+        if (review.getContent() == null || review.getContent().trim().isEmpty()) {
+            throw new ValidationException("Содержание отзыва не может быть пустым");
+        }
+        if (review.getIsPositive() == null) {
+            throw new ValidationException("Тип отзыва должен быть указан");
+        }
 
         return reviewStorage.updateReview(review);
     }
@@ -109,11 +126,6 @@ public class ReviewService {
     public void addLike(long reviewId, long userId) {
         validateReviewAndUser(reviewId, userId);
 
-        if (reviewStorage.hasUserRatedReview(reviewId, userId)) {
-            // Если пользователь уже оценил отзыв, удаляем предыдущую оценку
-            removeReaction(reviewId, userId);
-        }
-
         reviewStorage.addLike(reviewId, userId);
     }
 
@@ -122,11 +134,6 @@ public class ReviewService {
      */
     public void addDislike(long reviewId, long userId) {
         validateReviewAndUser(reviewId, userId);
-
-        if (reviewStorage.hasUserRatedReview(reviewId, userId)) {
-            // Если пользователь уже оценил отзыв, удаляем предыдущую оценку
-            removeReaction(reviewId, userId);
-        }
 
         reviewStorage.addDislike(reviewId, userId);
     }
@@ -145,24 +152,6 @@ public class ReviewService {
             reviewStorage.removeLike(reviewId, userId);
         } else {
             reviewStorage.removeDislike(reviewId, userId);
-        }
-    }
-
-    /**
-     * Валидация отзыва
-     */
-    private void validateReview(Review review) {
-        if (review.getContent() == null || review.getContent().trim().isEmpty()) {
-            throw new ValidationException("Содержание отзыва не может быть пустым");
-        }
-        if (review.getIsPositive() == null) {
-            throw new ValidationException("Тип отзыва должен быть указан");
-        }
-        if (review.getUserId() == null) {
-            throw new ValidationException("ID пользователя должен быть указан");
-        }
-        if (review.getFilmId() == null) {
-            throw new ValidationException("ID фильма должен быть указан");
         }
     }
 
