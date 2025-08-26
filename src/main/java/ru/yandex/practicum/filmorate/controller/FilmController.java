@@ -24,6 +24,7 @@ public class FilmController {
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
         log.debug("FilmController. Запрос на добавление фильма {}", film.getName());
+        System.out.println(film);
         return filmService.addFilm(film);
     }
 
@@ -67,6 +68,13 @@ public class FilmController {
     public List<Film> getFilmsByDirectorSorted(@PathVariable("directorId") long directorId,
                                                @RequestParam String sortBy) {
         return filmService.getFilmsByDirectorSorted(directorId, sortBy);
+    }
+
+    @GetMapping("/search")
+    public List<Film> getFilmsSearch(@RequestParam("query") String query,
+                                     @RequestParam("by") String by) {
+        log.debug("FilmController. getFilmsSearch query={}, by={}", query, by);
+        return filmService.getFilmsSearch(query, by);
     }
 
 }
