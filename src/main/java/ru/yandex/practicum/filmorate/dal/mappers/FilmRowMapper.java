@@ -28,8 +28,16 @@ public class FilmRowMapper implements RowMapper<Film> {
         Timestamp releaseDate = resultSet.getTimestamp("releaseDate");
         film.setReleaseDate(releaseDate.toLocalDateTime().toLocalDate());
 
-        film.setDuration(resultSet.getInt("duration"));;
+        film.setDuration(resultSet.getInt("duration"));
         film.setMpa(new Mpa(resultSet.getInt("mpa_id"), resultSet.getString("mpa_name")));
+
+        // Добавляем количество лайков, если есть в результате
+        try {
+            film.setLikesCount(resultSet.getLong("like_count"));
+        } catch (SQLException e) {
+            // Если колонки нет, оставляем значение по умолчанию
+            film.setLikesCount(0);
+        }
 
         return film;
     }

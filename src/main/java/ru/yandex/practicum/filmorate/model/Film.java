@@ -20,17 +20,13 @@ import java.util.List;
 @Builder
 public class Film {
     private Long id;
-
     @NotEmpty
     @NotBlank
     private String name;
-
     @Size(max = 200)
     private String description;
-
     @After1895
     private LocalDate releaseDate;
-
     @Positive
     private Integer duration;
 
@@ -42,7 +38,6 @@ public class Film {
 
     @Builder.Default
     private List<Director> directors = new ArrayList<>();
-
     private Mpa mpa;
 
     public Film(String name, String description, LocalDate releaseDate, Integer duration) {
