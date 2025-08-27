@@ -88,9 +88,9 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     public long getLikeListsByFilmId(long id) {
         return likeStorage.getLikeListsByFilmId(id).size();
     }
+
     private static final String GET_FILMS_SEARCH_BY_DIRECTOR = "SELECT f.id, f.name, f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name FROM FILM AS f JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id JOIN film_director AS fd ON fd.film_id=f.id JOIN director AS d ON fd.director_id=d.id WHERE LOWER (d.name) LIKE ?";
     private static final String GET_FILMS_SEARCH_BY_TITLE = "SELECT f.id, f.name, f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name FROM FILM AS f JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id WHERE LOWER (f.name) LIKE ?";
-
     private static final String DELETE_FILM_QUERY = "DELETE FROM film WHERE id = ?";
 
     @Override
