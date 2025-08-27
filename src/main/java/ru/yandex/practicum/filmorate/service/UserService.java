@@ -171,6 +171,4 @@ public class UserService {
         return userStorage.getUser(id).orElseThrow(() ->
                 new NotFoundUserByIdException("Не найден пользователь по id ", id));
     }
-
 }
-
