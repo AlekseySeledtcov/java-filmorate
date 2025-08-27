@@ -44,6 +44,7 @@ public class UserService {
     }
 
     public User addUser(User user) {
+        userValidator(user);
         if (userStorage.containsUserByEmail(user.getEmail())) {
             throw new DuplicatedDataException("Данный пользователь уже есть");
         }
@@ -172,5 +173,11 @@ public class UserService {
                 new NotFoundUserByIdException("Не найден пользователь по id ", id));
     }
 
+    private User userValidator(User user) {
+        if (user.getName()==null || user.getName().trim().isEmpty()) {
+            user.setName(user.getLogin());
+        }
+        return user;
+    }
 }
 
