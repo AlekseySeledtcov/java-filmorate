@@ -85,9 +85,28 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     "GROUP BY f.id " +
                     "ORDER BY like_count DESC";
 
+    private static final String GET_FILM_BY_YEAR =
+            "SELECT f.id, f.name, f.description, f.releasedate, f.duration, " +
+                    "mr.mpa_id, mr.mpa_name, COUNT(ll.film_id) AS like_count " +
+                    "FROM film AS f " +
+                    "JOIN mpa_rating AS mr ON f.rating_id = mr.mpa_id " +
+                    "LEFT JOIN like_list AS ll ON f.id = ll.film_id " + // LEFT JOIN вместо JOIN
+                    "WHERE EXTRACT(YEAR FROM releasedate) = ?" +
+                    "GROUP BY f.id, f.name, f.description, f.releasedate, f.duration, mr.mpa_id, mr.mpa_name " +
+                    "ORDER BY like_count DESC ";
+    private static final String GET_FILM_NOT_YEAR =
+            "SELECT f.id, f.name, f.description, f.releasedate, f.duration, " +
+                    "mr.mpa_id, mr.mpa_name, COUNT(ll.film_id) AS like_count " +
+                    "FROM film AS f " +
+                    "JOIN mpa_rating AS mr ON f.rating_id = mr.mpa_id " +
+                    "LEFT JOIN like_list AS ll ON f.id = ll.film_id " + // LEFT JOIN вместо JOIN
+                    "GROUP BY f.id, f.name, f.description, f.releasedate, f.duration, mr.mpa_id, mr.mpa_name " +
+                    "ORDER BY like_count DESC ";
+
     public long getLikeListsByFilmId(long id) {
         return likeStorage.getLikeListsByFilmId(id).size();
     }
+
     private static final String GET_FILMS_SEARCH_BY_DIRECTOR = "SELECT f.id, f.name, f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name FROM FILM AS f JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id JOIN film_director AS fd ON fd.film_id=f.id JOIN director AS d ON fd.director_id=d.id WHERE LOWER (d.name) LIKE ?";
     private static final String GET_FILMS_SEARCH_BY_TITLE = "SELECT f.id, f.name, f.description, f.releasedate,f.duration, mr.mpa_id, mr.mpa_name FROM FILM AS f JOIN mpa_rating AS mr ON f.rating_id=mr.mpa_id WHERE LOWER (f.name) LIKE ?";
 
@@ -135,6 +154,19 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     }
 
     @Override
+    public List<Film> getPopularFilms(Integer year) {
+        log.debug("FilmDbStorage. getPopularFilms. year={}", year);
+        if (year != null) {
+            List<Film> films = findMany(GET_FILM_BY_YEAR, year);
+            log.debug("FilmDbStorage. getPopularFilms. Популярных фильмов = {}", films.size());
+            return films;
+        }
+        List<Film> films = findMany(GET_FILM_NOT_YEAR);
+        log.debug("FilmDbStorage. getPopularFilms. Популярных фильмов = {}", films.size());
+        return films;
+    }
+
+    @Override
     public Optional<Film> getFilm(long id) {
         log.debug("FilmDbStorage. getFilm. с id {}", id);
         return findOne(FIND_BY_ID_QUERY, id);
@@ -142,7 +174,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
     @Override
     public boolean containsFilmById(long id) {
-        log.debug("FilmDbStorage. containsFilmById Проверка ниличия фильма в БД с id {}", id);
+        log.debug("FilmDbStorage. containsFilmById Проверка наличия фильма в БД с id {}", id);
         Long count = jdbc.queryForObject(CONTAINS_BY_ID_QUERY, Long.class, id);
         return count > 0;
 

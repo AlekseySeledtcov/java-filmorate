@@ -10,6 +10,8 @@ public interface FilmStorage {
 
     Film updateFilm(Film film);
 
+    List<Film> getPopularFilms(Integer year);
+
     Optional<Film> getFilm(long id);
 
     List<Film> getFilms();

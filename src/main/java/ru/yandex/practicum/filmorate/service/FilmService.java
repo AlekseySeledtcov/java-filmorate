@@ -124,14 +124,18 @@ public class FilmService {
         return addData(film);
     }
 
-    public List<Film> getPopularFilmList(int count) {
-        log.debug("Получение {} популярных фильмов", count);
-        List<Film> films = filmStorage.getPopularFilmList(count);
-        for (Film film : films) {
-            film.setLikesCount(filmStorage.getLikeListsByFilmId(film.getId()));
-        }
+    public List<Film> getPopularFilms(int limit, Integer genreId, Integer year) {
+        log.debug("FilmService. getPopularFilms. limit = {}, genreId = {}, year={}", limit, genreId, year);
+
+        List<Film> films = filmStorage.getPopularFilms(year);
+        films.forEach(this::addData);
         return films.stream()
-                .sorted(Comparator.comparing(Film::getLikesCount).reversed())
+                .distinct()
+                .filter(film -> genreId == null ||
+                        (film.getGenres() != null &&
+                                film.getGenres().stream().anyMatch(genre -> genre.getId().equals(genreId))))
+                .sorted(Comparator.comparing(Film::getLikesCount, Comparator.reverseOrder()))
+                .limit(limit)
                 .toList();
     }
 
