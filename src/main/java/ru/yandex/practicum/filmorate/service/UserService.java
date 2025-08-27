@@ -174,7 +174,7 @@ public class UserService {
     }
 
     private User userValidator(User user) {
-        if (user.getName()==null || user.getName().trim().isEmpty()) {
+        if (user.getName() == null || user.getName().trim().isEmpty()) {
             user.setName(user.getLogin());
         }
         return user;
