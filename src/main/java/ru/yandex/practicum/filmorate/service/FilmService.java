@@ -14,9 +14,9 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
 
 
 @Slf4j
@@ -166,6 +166,68 @@ public class FilmService {
         film.setDirectors(directorService.getDirectorsByFilmId(film.getId()));
         return film;
     }
+
+    public List<Film> getCommonFilms(long userId, long friendId) {
+        log.debug("FilmService. Получение общих фильмов для userId={} и friendId={}", userId, friendId);
+
+        if (!userStorage.containsUserById(userId)) {
+            throw new NotFoundUserByIdException("Пользователь не найден", userId);
+        }
+        if (!userStorage.containsUserById(friendId)) {
+            throw new NotFoundUserByIdException("Друг не найден", friendId);
+        }
+
+        List<Film> commonFilms = filmStorage.getCommonFilms(userId, friendId);
+
+        commonFilms.forEach(this::addData);
+
+        commonFilms.sort(Comparator.comparingLong(Film::getLikesCount).reversed());
+
+        return commonFilms;
+    }
+
+    public List<Film> getFilmsSearch(String query, String by) {
+
+        List<Film> films = new ArrayList<>();
+        String[] byArr = by.replaceAll("\\s+", "").split(",");
+
+        for (String s : byArr) {
+            if (s.equals("director")) {
+                films.addAll(filmStorage.getFilmsSearchByDirector("%" + query.toLowerCase() + "%"));
+            }
+            if (s.equals("title")) {
+                films.addAll(filmStorage.getFilmsSearchByTitle("%" + query.toLowerCase() + "%"));
+            }
+        }
+
+        if (!films.isEmpty()) {
+            films.forEach(this::addData);
+        }
+
+        return films.stream()
+                .distinct()
+                .sorted(Comparator.comparing(Film::getLikesCount))
+                .toList();
+    }
+
+    public void deleteFilm(long id) {
+        log.debug("Сервис. deleteFilm Удаление фильма с id {}", id);
+
+        if (!filmStorage.containsFilmById(id)) {
+            throw new NotFoundFilmException("Не найден фильм для удаления по id ", id);
+        }
+
+        likeStorage.deleteAllLikesForFilm(id);
+        genreService.deleteGenre(id);
+        directorService.deleteDirectorsFromFilm(id);
+
+        boolean wasDeleted = filmStorage.deleteFilm(id);
+        if (!wasDeleted) {
+            throw new NotFoundFilmException("Не удалось удалить фильм по id ", id);
+        }
+        log.debug("Фильм с id {} успешно удален: {}", id, wasDeleted);
+    }
+
 }
 
 
