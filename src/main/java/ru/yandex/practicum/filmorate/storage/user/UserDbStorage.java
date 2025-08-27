@@ -151,4 +151,5 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
         int rowsDeleted = jdbc.update(DELETE_USER_QUERY, id);
         return rowsDeleted > 0;
     }
+
 }
