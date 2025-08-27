@@ -87,4 +87,5 @@ public class UserController {
         log.debug("Контроллер. Получение пользователя по id {}", id);
         return userService.getUserById(id);
     }
+
 }
