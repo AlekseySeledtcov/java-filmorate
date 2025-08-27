@@ -101,7 +101,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     "JOIN mpa_rating AS mr ON f.rating_id = mr.mpa_id " +
                     "LEFT JOIN like_list AS ll ON f.id = ll.film_id " + // LEFT JOIN вместо JOIN
                     "GROUP BY f.id, f.name, f.description, f.releasedate, f.duration, mr.mpa_id, mr.mpa_name " +
-                    "ORDER BY like_count DESC ";
+                    "ORDER BY like_count DESC";
 
     public long getLikeListsByFilmId(long id) {
         return likeStorage.getLikeListsByFilmId(id).size();
