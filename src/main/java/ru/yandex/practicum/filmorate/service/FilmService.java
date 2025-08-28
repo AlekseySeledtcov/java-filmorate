@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.*;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
@@ -33,6 +36,7 @@ public class FilmService {
     private final DirectorService directorService;
     private final ReviewStorage reviewStorage;
     private final JdbcTemplate jdbc;
+    private final EventService eventService;
 
     public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
                        @Qualifier("UserDbStorage") UserStorage userStorage,
@@ -42,7 +46,8 @@ public class FilmService {
                        GenreService genreService,
                        DirectorService directorService,
                        ReviewStorage reviewStorage,
-                       JdbcTemplate jdbc) {
+                       JdbcTemplate jdbc,
+                       EventService eventService) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.mpaStorage = mpaStorage;
@@ -52,6 +57,7 @@ public class FilmService {
         this.directorService = directorService;
         this.reviewStorage = reviewStorage;
         this.jdbc = jdbc;
+        this.eventService = eventService;
     }
 
     public Film addFilm(Film film) {
@@ -100,6 +106,14 @@ public class FilmService {
         }
 
         likeStorage.putLike(userId, filmId);
+        eventService.addEvent(Event.builder()
+                .userId(userId)
+                .entityId(filmId)
+                .eventType(EventType.LIKE)
+                .operation(Operation.ADD)
+                .build());
+        log.debug("Событие добавлено: userId={}, entityId={}, eventType={}, operation={}",
+                userId, filmId, EventType.LIKE, Operation.ADD);
 
         Film film = filmStorage.getFilm(filmId).orElseThrow(() -> {
             log.warn("FilmService, putLikeToFilm, фильм с id {} не найден", filmId);
@@ -117,6 +131,15 @@ public class FilmService {
             throw new NotFoundUserByIdException("Не найден пользователь в методе deleteLiketoFilm по userId ", userId);
         }
         likeStorage.deleteLike(filmId, userId);
+        log.debug("Удалён лайк от пользователя с id {} к фильму с id {}", userId, filmId);
+        Event event = Event.builder()
+                .userId(userId)
+                .entityId(filmId)
+                .eventType(EventType.LIKE)
+                .operation(Operation.REMOVE)
+                .build();
+        log.debug("Добавление события в ленту: {}", event);
+        eventService.addEvent(event);
         Film film = filmStorage.getFilm(filmId).orElseThrow(() -> {
             log.warn("FilmService, deleteLikeToFilm, фильм с id {} не найден", filmId);
             throw new NotFoundFilmException(String.format("Фильм с id %d не найден", filmId), filmId);

@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.List;
@@ -21,9 +23,11 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final EventService eventService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, EventService eventservice) {
         this.userService = userService;
+        this.eventService = eventservice;
     }
 
     @PostMapping
@@ -88,4 +92,9 @@ public class UserController {
         return userService.getUserById(id);
     }
 
+    @GetMapping("/{id}/feed")
+    public List<Event> getUserFeed(@PathVariable long id) {
+        log.debug("Контроллер событий. Получение ленты событий пользователя с id {}", id);
+        return eventService.getUserFeed(id);
+    }
 }

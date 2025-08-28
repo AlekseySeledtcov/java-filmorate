@@ -9,8 +9,11 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundFriendshipException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByFriendIdException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByIdException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.FriendsList;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.friendlist.FriendListStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
@@ -30,17 +33,20 @@ public class UserService {
     private final LikeStorage likeStorage;
     private final ReviewStorage reviewStorage;
     private final JdbcTemplate jdbc;
+    private final EventService eventService;
 
     public UserService(@Qualifier("UserDbStorage") UserStorage userStorage,
                        @Qualifier("FriendListDbStorage") FriendListStorage friendListStorage,
                        LikeStorage likeStorage,
                        ReviewStorage reviewStorage,
-                       JdbcTemplate jdbc) {
+                       JdbcTemplate jdbc,
+                       EventService eventService) {
         this.userStorage = userStorage;
         this.friendListStorage = friendListStorage;
         this.likeStorage = likeStorage;
         this.reviewStorage = reviewStorage;
         this.jdbc = jdbc;
+        this.eventService = eventService;
     }
 
     public User addUser(User user) {
@@ -78,6 +84,15 @@ public class UserService {
         }
 
         friendListStorage.deleteFriend(id, friendId);
+        Event event = Event.builder()
+                .userId(id)
+                .entityId(friendId)
+                .eventType(EventType.FRIEND)
+                .operation(Operation.REMOVE)
+                .build();
+
+        log.debug("UserService: Добавление события удаления друга: {}", event);
+        eventService.addEvent(event);
         log.debug("Получение списка друзей у пользователя с id после удаления друга");
         return userStorage.getUserFriendsList(id);
     }
@@ -141,7 +156,14 @@ public class UserService {
 
         log.debug("Сервис. Добавление пользователю с id {} друга с friendId {}", userId, friendId);
         friendListStorage.addFriend(userId, friendId);
-
+        Event event = Event.builder()
+                .userId(userId)
+                .entityId(friendId)
+                .eventType(EventType.FRIEND)
+                .operation(Operation.ADD)
+                .build();
+        log.debug("UserService: Добавление события в ленту: {}", event);
+        eventService.addEvent(event);
         return userStorage.getUserFriendsList(userId);
     }
 
