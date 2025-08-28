@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
@@ -20,6 +21,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -73,10 +75,14 @@ public class FilmService {
     }
 
     public List<Film> getFilms() {
-        return filmStorage.getFilms();
+        List<Film> films = filmStorage.getFilms();
+        films.forEach(this::addData);
+        return films;
     }
 
     public Film updateFilm(Film film) {
+
+        film.setGenres(genreValidator(film.getGenres()));
 
         if (!filmStorage.containsFilmById(film.getId())) {
             throw new NotFoundFilmException("Не найден фильм в методе updateFilm по id ", film.getId());
@@ -85,11 +91,15 @@ public class FilmService {
         if (!film.getGenres().isEmpty()) {
             genreService.deleteGenre(film.getId());
             genreService.putGenre(film.getGenres(), film.getId());
+        } else {
+            genreService.deleteGenre(film.getId());
         }
 
         if (!film.getDirectors().isEmpty()) {
             directorService.deleteDirectorsFromFilm(film.getId());
             directorService.putDirectorsToFilm(film.getDirectors(), film.getId());
+        } else {
+            directorService.deleteDirectorsFromFilm(film.getId());
         }
         return filmStorage.updateFilm(film);
     }
@@ -236,6 +246,12 @@ public class FilmService {
             throw new NotFoundFilmException("Не удалось удалить фильм по id ", id);
         }
         log.debug("Фильм с id {} успешно удален: {}", id, wasDeleted);
+    }
+
+    private List<Genre> genreValidator (List<Genre> genre) {
+        return genre.stream()
+                .distinct()
+                .toList();
     }
 
     private Film addData(Film film) {

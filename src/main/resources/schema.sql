@@ -62,7 +62,7 @@ name VARCHAR(50) NOT NULL
 
 CREATE TABLE IF NOT EXISTS film_director (
 film_id INTEGER REFERENCES film (id) ON DELETE CASCADE,
-director_id INTEGER REFERENCES director (id) ON DELETE NO ACTION
+director_id INTEGER REFERENCES director (id) ON DELETE CASCADE
 );
 
 
