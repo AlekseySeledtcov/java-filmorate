@@ -8,7 +8,10 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundReactionException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundReviewException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByIdException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -21,13 +24,16 @@ public class ReviewService {
     private final ReviewStorage reviewStorage;
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
+    private final EventService eventService;
 
     public ReviewService(ReviewStorage reviewStorage,
                          @Qualifier("UserDbStorage") UserStorage userStorage,
-                         @Qualifier("FilmDbStorage") FilmStorage filmStorage) {
+                         @Qualifier("FilmDbStorage") FilmStorage filmStorage,
+                         EventService eventService) {
         this.reviewStorage = reviewStorage;
         this.userStorage = userStorage;
         this.filmStorage = filmStorage;
+        this.eventService = eventService;
     }
 
     /**
@@ -55,8 +61,23 @@ public class ReviewService {
             review.setUseful(0);
         }
 
-        return reviewStorage.addReview(review);
+        //return reviewStorage.addReview(review);
+        Review createdReview = reviewStorage.addReview(review);
+
+        // Добавляем событие после сохранения
+        Event event = Event.builder()
+                .userId(createdReview.getUserId())
+                .entityId(createdReview.getReviewId())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.ADD)
+                .build();
+
+        log.debug("Добавление события в ленту: {}", event);
+        eventService.addEvent(event);
+
+        return createdReview;  // тут возвращаем результат reviewStorage.addReview(review)
     }
+
 
     /**
      * Обновление существующего отзыва
@@ -80,19 +101,44 @@ public class ReviewService {
         if (review.getIsPositive() == null) {
             throw new ValidationException("Тип отзыва должен быть указан");
         }
+        Review updatedReview = reviewStorage.updateReview(review);
 
-        return reviewStorage.updateReview(review);
+        // Создаем и добавляем событие
+        Event event = Event.builder()
+                .userId(updatedReview.getUserId())
+                .entityId(updatedReview.getReviewId())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.UPDATE)
+                .build();
+
+        log.debug("Добавление события в ленту после обновления отзыва: {}", event);
+        eventService.addEvent(event);
+
+        return updatedReview;
     }
+    //return reviewStorage.updateReview(review);
+
 
     /**
      * Удаление отзыва по ID
      */
     public void deleteReview(long id) {
+        Review review = getReviewById(id);
         if (!reviewStorage.getReviewById(id).isPresent()) {
             throw new NotFoundReviewException("Отзыв с ID " + id + " не найден", id);
         }
         reviewStorage.deleteReview(id);
+        Event event = Event.builder()
+                .userId(review.getUserId())
+                .entityId(review.getReviewId())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.REMOVE)
+                .build();
+
+        log.info("Создаём событие удаления отзыва с operation = {}", event.getOperation());
+        eventService.addEvent(event);
     }
+
 
     /**
      * Получение отзыва по ID
