@@ -61,7 +61,6 @@ public class ReviewService {
             review.setUseful(0);
         }
 
-        //return reviewStorage.addReview(review);
         Review createdReview = reviewStorage.addReview(review);
 
         // Добавляем событие после сохранения
@@ -116,8 +115,6 @@ public class ReviewService {
 
         return updatedReview;
     }
-    //return reviewStorage.updateReview(review);
-
 
     /**
      * Удаление отзыва по ID
