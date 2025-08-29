@@ -62,7 +62,7 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
     public Review updateReview(Review review) {
         log.debug("Обновление отзыва ID: {}", review.getReviewId());
         jdbc.update(UPDATE_QUERY, review.getContent(), review.getIsPositive(), review.getReviewId());
-        return review;
+        return getReviewById(review.getReviewId()).get();
     }
 
     @Override

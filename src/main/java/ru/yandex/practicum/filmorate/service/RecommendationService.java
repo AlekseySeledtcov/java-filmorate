@@ -20,11 +20,14 @@ import java.util.Set;
 public class RecommendationService {
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
+    private final FilmService filmService;
 
     public RecommendationService(@Qualifier("userDbStorage") UserStorage userStorage,
-                                 @Qualifier("filmDbStorage") FilmStorage filmStorage) {
+                                 @Qualifier("filmDbStorage") FilmStorage filmStorage,
+                                 FilmService filmService) {
         this.userStorage = userStorage;
         this.filmStorage = filmStorage;
+        this.filmService = filmService;
     }
 
     /**
@@ -59,6 +62,8 @@ public class RecommendationService {
         recommendedFilms.removeAll(filmsLikedByCurrentUser);
 
         log.debug("Найдено {} рекомендаций для пользователя ID: {}", recommendedFilms.size(), userId);
+
+        recommendedFilms.forEach(filmService::addData);
 
         return new Recommendations(userId, new ArrayList<>(recommendedFilms));
     }

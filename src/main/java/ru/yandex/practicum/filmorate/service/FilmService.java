@@ -111,9 +111,6 @@ public class FilmService {
         if (!userStorage.containsUserById(userId)) {
             throw new NotFoundUserByIdException("Не найден пользователь в методе putLikeToFilm по userId ", userId);
         }
-        if (likeStorage.containsLike(userId, filmId)) {
-            throw new DuplicatedDataException("Этим пользователем лайк уже поставлен");
-        }
 
         likeStorage.putLike(userId, filmId);
         eventService.addEvent(Event.builder()
@@ -182,6 +179,9 @@ public class FilmService {
 
     public List<Film> getFilmsByDirectorSorted(long directorId, String sortedBy) {
         List<Film> films = filmStorage.getFilmsByDirectorSorted(directorId, sortedBy);
+        if (films == null || films.isEmpty()) {
+            throw new NotFoundEntityByIdException(String.format("Фильм с id директора %d не найден", directorId), directorId);
+        }
         films.forEach(this::addData);
         return films;
     }
@@ -225,7 +225,7 @@ public class FilmService {
 
         return films.stream()
                 .distinct()
-                .sorted(Comparator.comparing(Film::getLikesCount))
+                .sorted(Comparator.comparing(Film::getLikesCount).reversed())
                 .toList();
     }
 
@@ -248,17 +248,17 @@ public class FilmService {
         log.debug("Фильм с id {} успешно удален: {}", id, wasDeleted);
     }
 
-    private List<Genre> genreValidator (List<Genre> genre) {
-        return genre.stream()
-                .distinct()
-                .toList();
-    }
-
-    private Film addData(Film film) {
+    public Film addData(Film film) {
         film.setGenres(genreService.getGenresByFilmId(film.getId()));
         film.setDirectors(directorService.getDirectorsByFilmId(film.getId()));
         film.setLikesCount(filmStorage.getLikeListsByFilmId(film.getId()));
         return film;
+    }
+
+    private List<Genre> genreValidator (List<Genre> genre) {
+        return genre.stream()
+                .distinct()
+                .toList();
     }
 }
 

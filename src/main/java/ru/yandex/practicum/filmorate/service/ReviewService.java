@@ -87,13 +87,7 @@ public class ReviewService {
         if (review.getReviewId() == null) {
             throw new ValidationException("ID отзыва должен быть указан");
         }
-
-        Review existingReview = getReviewById(review.getReviewId());
-
-        if (!existingReview.getUserId().equals(review.getUserId())) {
-            throw new ValidationException("Пользователь может редактировать только свои отзывы");
-        }
-
+//        Review existingReview = getReviewById(review.getReviewId());
         if (review.getContent() == null || review.getContent().trim().isEmpty()) {
             throw new ValidationException("Содержание отзыва не может быть пустым");
         }
@@ -101,7 +95,6 @@ public class ReviewService {
             throw new ValidationException("Тип отзыва должен быть указан");
         }
         Review updatedReview = reviewStorage.updateReview(review);
-
         // Создаем и добавляем событие
         Event event = Event.builder()
                 .userId(updatedReview.getUserId())
