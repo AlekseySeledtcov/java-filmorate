@@ -21,7 +21,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -255,7 +254,7 @@ public class FilmService {
         return film;
     }
 
-    private List<Genre> genreValidator (List<Genre> genre) {
+    private List<Genre> genreValidator(List<Genre> genre) {
         return genre.stream()
                 .distinct()
                 .toList();
