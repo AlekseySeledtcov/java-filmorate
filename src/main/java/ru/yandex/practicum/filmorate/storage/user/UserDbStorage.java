@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -15,7 +14,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Qualifier("UserDbStorage")
 @Repository
 public class UserDbStorage extends BaseStorage<User> implements UserStorage {
 
@@ -45,7 +43,7 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
 
     @Override
     public User addUser(User user) {
-        log.debug("Хранилище. addUser");
+        log.debug("addUser Добавление пользователя");
         long id = insert(
                 INSERT_QUERY,
                 user.getEmail(),
@@ -59,7 +57,7 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-        log.debug("Хранилище. updateUser Обновление полей пользователя name {}", user.getName());
+        log.debug("updateUser Обновление полей пользователя name {}", user.getName());
         update(
                 UPDATE_QUERY,
                 user.getName(),
@@ -85,28 +83,28 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
 
     @Override
     public boolean containsUserById(long id) {
-        log.debug("Хранилище. containsUser Проверка ниличия пользователя в БД с id {}", id);
+        log.debug("containsUser Проверка ниличия пользователя в БД с id {}", id);
         long count = jdbc.queryForObject(CONTAINS_BY_ID_QUERY, long.class, id);
         return count > 0;
     }
 
     @Override
     public boolean containsUserByEmail(String email) {
-        log.debug("Хранилище. containsUser Проверка ниличия пользователя в БД с email {}", email);
+        log.debug("containsUser Проверка ниличия пользователя в БД с email {}", email);
         long count = jdbc.queryForObject(CONTAINS_BY_EMAIL_QUERY, long.class, email);
         return count > 0;
     }
 
     @Override
     public List<User> getUserFriendsList(long id) {
-        log.debug("Хранилище. getUserFriendsList Получение списка друзей пользователя с id {}", id);
+        log.debug("getUserFriendsList Получение списка друзей пользователя с id {}", id);
         return findMany(FIND_ALL_FRIENDS_BY_USER_ID_QUERY, id).stream()
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<User> getUsersCommonFriendList(Long id, Long otherId) {
-        log.debug("Хранилище. getUsersCommonFriendList Получение списка общих друзей");
+        log.debug("getUsersCommonFriendList Получение списка общих друзей");
         return findMany(FIND_COMMON_FRIENDS_BY_USER_ID_QUERY, id, otherId);
     }
 
@@ -130,7 +128,7 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
 
     @Override
     public List<User> getUsersByIds(List<Long> userIds) {
-        log.debug("Хранилище. getUsersByIds получение пользователей по списку ID: {}", userIds);
+        log.debug("getUsersByIds получение пользователей по списку ID: {}", userIds);
 
         if (userIds == null || userIds.isEmpty()) {
             return Collections.emptyList();
@@ -147,7 +145,7 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
 
     @Override
     public boolean deleteUser(long id) {
-        log.debug("Хранилище. deleteUser Удаление пользователя с id {}", id);
+        log.debug("deleteUser Удаление пользователя с id {}", id);
         int rowsDeleted = jdbc.update(DELETE_USER_QUERY, id);
         return rowsDeleted > 0;
     }

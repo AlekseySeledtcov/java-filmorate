@@ -32,7 +32,6 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
     private static final String ADD_LIKE_QUERY = "INSERT INTO review_likes (review_id, user_id, is_like) VALUES (?, ?, true)";
     private static final String ADD_DISLIKE_QUERY = "INSERT INTO review_likes (review_id, user_id, is_like) VALUES (?, ?, false)";
     private static final String REMOVE_LIKE_QUERY = "DELETE FROM review_likes WHERE review_id = ? AND user_id = ?";
-    private static final String UPDATE_USEFUL_QUERY = "UPDATE reviews SET useful = useful + ? WHERE review_id = ?";
     private static final String SET_USEFUL_QUERY = "UPDATE reviews SET useful = ? WHERE review_id = ?";
     private static final String HAS_USER_RATED_QUERY = "SELECT COUNT(*) FROM review_likes WHERE review_id = ? AND user_id = ?";
     private static final String IS_LIKE_QUERY = "SELECT is_like FROM review_likes WHERE review_id = ? AND user_id = ?";
@@ -151,27 +150,27 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
     public boolean hasUserRatedReview(long reviewId, long userId) {
         log.debug("Проверка, оценивал ли пользователь ID: {} отзыв ID: {}", userId, reviewId);
         Long count = jdbc.queryForObject(HAS_USER_RATED_QUERY, Long.class, reviewId, userId);
-        return count != null && count > 0;
+        return count > 0;
     }
 
     @Override
     public boolean isLike(long reviewId, long userId) {
         log.debug("Проверка типа оценки отзыва ID: {} пользователем ID: {}", reviewId, userId);
         Boolean isLike = jdbc.queryForObject(IS_LIKE_QUERY, Boolean.class, reviewId, userId);
-        return isLike != null && isLike;
+        return isLike;
     }
 
     // Вспомогательные методы для реализации переключения оценок
     private boolean hasUserLiked(long reviewId, long userId) {
         String sql = "SELECT COUNT(*) FROM review_likes WHERE review_id = ? AND user_id = ? AND is_like = true";
         Integer count = jdbc.queryForObject(sql, Integer.class, reviewId, userId);
-        return count != null && count > 0;
+        return count > 0;
     }
 
     private boolean hasUserDisliked(long reviewId, long userId) {
         String sql = "SELECT COUNT(*) FROM review_likes WHERE review_id = ? AND user_id = ? AND is_like = false";
         Integer count = jdbc.queryForObject(sql, Integer.class, reviewId, userId);
-        return count != null && count > 0;
+        return count > 0;
     }
 
     private void removeUserRating(long reviewId, long userId) {
@@ -190,20 +189,21 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
     }
 
     private int getLikesCount(long reviewId) {
-        Integer count = jdbc.queryForObject(GET_LIKES_COUNT_QUERY, Integer.class, reviewId);
-        return count != null ? count : 0;
+        return jdbc.queryForObject(GET_LIKES_COUNT_QUERY, Integer.class, reviewId);
     }
 
     private int getDislikesCount(long reviewId) {
-        Integer count = jdbc.queryForObject(GET_DISLIKES_COUNT_QUERY, Integer.class, reviewId);
-        return count != null ? count : 0;
+        return jdbc.queryForObject(GET_DISLIKES_COUNT_QUERY, Integer.class, reviewId);
     }
 
     @Override
     public void deleteReviewsByUserId(long userId) {
         log.debug("Удаление отзывов пользователя ID: {}", userId);
-        String deleteReviewLikesQuery = "DELETE FROM review_likes WHERE review_id IN " +
-                "(SELECT review_id FROM reviews WHERE user_id = ?)";
+
+        String deleteReviewLikesQuery = "DELETE FROM review_likes WHERE EXISTS (" +
+                "SELECT 1 FROM reviews WHERE reviews.review_id = review_likes.review_id AND reviews.user_id = ?" +
+                ")";
+
         jdbc.update(deleteReviewLikesQuery, userId);
         String deleteReviewsQuery = "DELETE FROM reviews WHERE user_id = ?";
         jdbc.update(deleteReviewsQuery, userId);
@@ -213,8 +213,10 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
     public void deleteReviewsByFilmId(long filmId) {
         log.debug("Удаление отзывов фильма ID: {}", filmId);
 
-        String deleteReviewLikesQuery = "DELETE FROM review_likes WHERE review_id IN " +
-                "(SELECT review_id FROM reviews WHERE film_id = ?)";
+        String deleteReviewLikesQuery = "DELETE FROM review_likes WHERE EXISTS (" +
+                "SELECT 1 FROM reviews WHERE reviews.review_id = review_likes.review_id AND reviews.film_id = ?" +
+                ")";
+
         jdbc.update(deleteReviewLikesQuery, filmId);
         String deleteReviewsQuery = "DELETE FROM reviews WHERE film_id = ?";
         jdbc.update(deleteReviewsQuery, filmId);

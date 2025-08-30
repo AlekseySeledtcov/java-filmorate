@@ -4,7 +4,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.service.MpaService;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,11 +11,6 @@ import java.sql.Timestamp;
 
 @Component
 public class FilmRowMapper implements RowMapper<Film> {
-    private final MpaService mpaService;
-
-    public FilmRowMapper(MpaService mpaService) {
-        this.mpaService = mpaService;
-    }
 
     @Override
     public Film mapRow(ResultSet resultSet, int rowNum) throws SQLException {
@@ -34,7 +28,7 @@ public class FilmRowMapper implements RowMapper<Film> {
         // Добавляем количество лайков, если есть в результате
         try {
             film.setLikesCount(resultSet.getLong("like_count"));
-        } catch (SQLException e) {
+        } catch (SQLException exception) {
             // Если колонки нет, оставляем значение по умолчанию
             film.setLikesCount(0);
         }

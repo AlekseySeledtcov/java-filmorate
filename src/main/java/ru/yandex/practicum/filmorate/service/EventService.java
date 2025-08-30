@@ -2,9 +2,8 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByIdException;
+import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.storage.events.EventStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -18,7 +17,6 @@ import java.util.List;
 public class EventService {
 
     private final EventStorage eventStorage;
-    @Qualifier("UserDbStorage")
     private final UserStorage userStorage;
 
     public void addEvent(Event event) {
@@ -29,7 +27,7 @@ public class EventService {
     public List<Event> getUserFeed(Long id) {
         log.info("Запрос на получение списка событий пользователя с id {}", id);
         if (!userStorage.containsUserById(id))
-            throw new NotFoundUserByIdException("Не найден пользователь с id ", id);
-        return new ArrayList<Event>(eventStorage.getAllEventsByUserId(id));
+            throw new EntityNotFoundException("Не найден пользователь с id ", id);
+        return new ArrayList<>(eventStorage.getAllEventsByUserId(id));
     }
 }

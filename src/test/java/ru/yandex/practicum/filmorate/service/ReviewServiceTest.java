@@ -6,11 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundFilmException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundReactionException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundReviewException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByIdException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.Review;
@@ -139,7 +135,7 @@ class ReviewServiceTest {
                 .filmId(film1.getId())
                 .build();
 
-        assertThrows(NotFoundUserByIdException.class, () -> reviewService.addReview(review));
+        assertThrows(EntityNotFoundException.class, () -> reviewService.addReview(review));
     }
 
     @Test
@@ -151,7 +147,7 @@ class ReviewServiceTest {
                 .filmId(999L)
                 .build();
 
-        assertThrows(NotFoundFilmException.class, () -> reviewService.addReview(review));
+        assertThrows(EntityNotFoundException.class, () -> reviewService.addReview(review));
     }
 
     @Test
@@ -204,7 +200,7 @@ class ReviewServiceTest {
 
         reviewService.deleteReview(created.getReviewId());
 
-        assertThrows(NotFoundReviewException.class, () -> reviewService.getReviewById(created.getReviewId()));
+        assertThrows(EntityNotFoundException.class, () -> reviewService.getReviewById(created.getReviewId()));
     }
 
     @Test
@@ -342,7 +338,7 @@ class ReviewServiceTest {
 
         Review created = reviewService.addReview(review);
 
-        assertThrows(NotFoundReactionException.class,
+        assertThrows(EntityNotFoundException.class,
                 () -> reviewService.removeReaction(created.getReviewId(), user2.getId()));
     }
 

@@ -21,31 +21,31 @@ public class FilmController {
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
-        log.debug("FilmController. Запрос на добавление фильма {}", film.getName());
+        log.debug("Запрос на добавление фильма {}", film.getName());
         return filmService.addFilm(film);
     }
 
     @GetMapping
     public List<Film> getFilms() {
-        log.debug("FilmController. Запрос на список фильмов");
+        log.debug("Запрос на список фильмов");
         return filmService.getFilms();
     }
 
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
-        log.debug("FilmController. Запрос на обновление фильма c id {}", film.getId());
+        log.debug("Запрос на обновление фильма c id {}", film.getId());
         return filmService.updateFilm(film);
     }
 
     @PutMapping("/{film_id}/like/{id}")
     public Film putLikeToFilm(@PathVariable("film_id") long filmId, @PathVariable("id") long userId) {
-        log.debug("FilmController. Запрос на добавление лайка фильму с id {} от пользователя с id {}", filmId, userId);
+        log.debug("Запрос на добавление лайка фильму с id {} от пользователя с id {}", filmId, userId);
         return filmService.putLikeToFilm(filmId, userId);
     }
 
     @DeleteMapping("{id}/like/{userId}")
     public Film deleteLiketoFilm(@PathVariable("id") long id, @PathVariable("userId") long userId) {
-        log.debug("FilmController. Запрос на удаление лайка");
+        log.debug("Запрос на удаление лайка");
         return filmService.deleteLikeToFilm(id, userId);
     }
 
@@ -54,13 +54,13 @@ public class FilmController {
             @RequestParam(value = "count", defaultValue = "10") int limit,
             @RequestParam(value = "genreId", required = false) Integer genreId,
             @RequestParam(value = "year", required = false) Integer year) {
-        log.debug("FilmController. getPopularFilms. limit={}, genreId={}, year={}", limit, genreId, year);
+        log.debug("getPopularFilms. limit={}, genreId={}, year={}", limit, genreId, year);
         return filmService.getPopularFilms(limit, genreId, year);
     }
 
     @GetMapping("/{id}")
     public Film getFilmWithGenreById(@PathVariable("id") long id) {
-        log.debug("FilmController. getFilmWithGenreById id={}", id);
+        log.debug("getFilmWithGenreById id={}", id);
         return filmService.getFilmWithGenreById(id);
     }
 
@@ -73,13 +73,22 @@ public class FilmController {
     @GetMapping("/search")
     public List<Film> getFilmsSearch(@RequestParam("query") String query,
                                      @RequestParam("by") String by) {
-        log.debug("FilmController. getFilmsSearch query={}, by={}", query, by);
+        log.debug("getFilmsSearch query={}, by={}", query, by);
         return filmService.getFilmsSearch(query, by);
     }
 
     @DeleteMapping("/{filmId}")
     public void deleteFilm(@PathVariable long filmId) {
-        log.debug("Контроллер. Удаление фильма с id {}", filmId);
+        log.debug("Удаление фильма с id {}", filmId);
         filmService.deleteFilm(filmId);
+    }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(
+            @RequestParam long userId,
+            @RequestParam long friendId) {
+
+        log.debug("GET /films/common?userId={}&friendId={} - получение общих фильмов", userId, friendId);
+        return filmService.getCommonFilms(userId, friendId);
     }
 }

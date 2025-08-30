@@ -21,31 +21,31 @@ public class DirectorController {
 
     @GetMapping
     public List<Director> getDirectors() {
-        log.debug("DirectorController. Get запрос на получение списка режиссеров");
+        log.debug("Get запрос на получение списка режиссеров");
         return directorService.getDirectors();
     }
 
     @GetMapping("/{id}")
     public Director getDirectorById(@PathVariable("id") long id) {
-        log.debug("DirectorController. Get запрос на получение режисера по ID {}", id);
+        log.debug("Get запрос на получение режисера по ID {}", id);
         return directorService.getDirectorById(id);
     }
 
     @PostMapping
     public Director postDirector(@Valid @RequestBody Director director) {
-        log.debug("DirectorController. Post запрос на создание режиссера {}", director.getName());
+        log.debug("Post запрос на создание режиссера {}", director.getName());
         return directorService.postDirector(director);
     }
 
     @PutMapping
     public Director putDirector(@Valid @RequestBody Director director) {
-        log.debug("DirectorController. Put запрос на изменение режисера NAME {}", director.getName());
+        log.debug("Put запрос на изменение режисера NAME {}", director.getName());
         return directorService.putDirector(director);
     }
 
     @DeleteMapping("/{id}")
     public void deleteDirector(@PathVariable("id") long id) {
-        log.debug("DirectorController. Delete запрос на удаление режисера по ID {}", id);
+        log.debug("Delete запрос на удаление режисера по ID {}", id);
         directorService.deleteDirector(id);
     }
 

@@ -1,13 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundFilmException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundReactionException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundReviewException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByIdException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
@@ -27,8 +22,8 @@ public class ReviewService {
     private final EventService eventService;
 
     public ReviewService(ReviewStorage reviewStorage,
-                         @Qualifier("UserDbStorage") UserStorage userStorage,
-                         @Qualifier("FilmDbStorage") FilmStorage filmStorage,
+                         UserStorage userStorage,
+                         FilmStorage filmStorage,
                          EventService eventService) {
         this.reviewStorage = reviewStorage;
         this.userStorage = userStorage;
@@ -42,20 +37,7 @@ public class ReviewService {
     public Review addReview(Review review) {
         log.debug("Добавление отзыва: {}", review);
 
-        if (review.getContent() == null || review.getContent().trim().isEmpty()) {
-            throw new ValidationException("Содержание отзыва не может быть пустым");
-        }
-        if (review.getIsPositive() == null) {
-            throw new ValidationException("Тип отзыва должен быть указан");
-        }
-        if (review.getUserId() == null) {
-            throw new ValidationException("ID пользователя должен быть указан");
-        }
-        if (review.getFilmId() == null) {
-            throw new ValidationException("ID фильма должен быть указан");
-        }
-
-        validateUserAndFilm(review.getUserId(), review.getFilmId());
+        validateUserAndFilm(review);
 
         if (review.getUseful() == null) {
             review.setUseful(0);
@@ -87,7 +69,6 @@ public class ReviewService {
         if (review.getReviewId() == null) {
             throw new ValidationException("ID отзыва должен быть указан");
         }
-//        Review existingReview = getReviewById(review.getReviewId());
         if (review.getContent() == null || review.getContent().trim().isEmpty()) {
             throw new ValidationException("Содержание отзыва не может быть пустым");
         }
@@ -114,9 +95,10 @@ public class ReviewService {
      */
     public void deleteReview(long id) {
         Review review = getReviewById(id);
-        if (!reviewStorage.getReviewById(id).isPresent()) {
-            throw new NotFoundReviewException("Отзыв с ID " + id + " не найден", id);
-        }
+        reviewStorage.getReviewById(id).orElseThrow(() -> {
+            throw new EntityNotFoundException("Отзыв с ID " + id + " не найден", id);
+        });
+
         reviewStorage.deleteReview(id);
         Event event = Event.builder()
                 .userId(review.getUserId())
@@ -135,7 +117,7 @@ public class ReviewService {
      */
     public Review getReviewById(long id) {
         return reviewStorage.getReviewById(id)
-                .orElseThrow(() -> new NotFoundReviewException("Отзыв с ID " + id + " не найден", id));
+                .orElseThrow(() -> new EntityNotFoundException("Отзыв с ID " + id + " не найден", id));
     }
 
     /**
@@ -150,7 +132,7 @@ public class ReviewService {
             return reviewStorage.getAllReviews(count);
         } else {
             if (!filmStorage.containsFilmById(filmId)) {
-                throw new NotFoundFilmException("Фильм с ID " + filmId + " не найден", filmId);
+                throw new EntityNotFoundException("Фильм с ID " + filmId + " не найден", filmId);
             }
             return reviewStorage.getReviewsByFilmId(filmId, count);
         }
@@ -181,7 +163,7 @@ public class ReviewService {
         validateReviewAndUser(reviewId, userId);
 
         if (!reviewStorage.hasUserRatedReview(reviewId, userId)) {
-            throw new NotFoundReactionException("Оценка отзыва не найдена", reviewId, userId);
+            throw new EntityNotFoundException("Оценка отзыва не найдена", reviewId);
         }
 
         if (reviewStorage.isLike(reviewId, userId)) {
@@ -194,19 +176,33 @@ public class ReviewService {
     /**
      * Валидация пользователя и фильма
      */
-    private void validateUserAndFilm(Long userId, Long filmId) {
-        if (userId == null) {
+    private void validateUserAndFilm(Review review) {
+
+        if (review.getUserId() == null) {
             throw new ValidationException("ID пользователя не может быть null");
         }
-        if (filmId == null) {
+        if (review.getFilmId() == null) {
             throw new ValidationException("ID фильма не может быть null");
         }
 
-        if (!userStorage.containsUserById(userId)) {
-            throw new NotFoundUserByIdException("Пользователь с ID " + userId + " не найден", userId);
+        if (!userStorage.containsUserById(review.getUserId())) {
+            throw new EntityNotFoundException("Пользователь с ID " + review.getUserId() + " не найден", review.getUserId());
         }
-        if (!filmStorage.containsFilmById(filmId)) {
-            throw new NotFoundFilmException("Фильм с ID " + filmId + " не найден", filmId);
+        if (!filmStorage.containsFilmById(review.getFilmId())) {
+            throw new EntityNotFoundException("Фильм с ID " + review.getFilmId() + " не найден", review.getFilmId());
+        }
+
+        if (review.getContent() == null || review.getContent().trim().isEmpty()) {
+            throw new ValidationException("Содержание отзыва не может быть пустым");
+        }
+        if (review.getIsPositive() == null) {
+            throw new ValidationException("Тип отзыва должен быть указан");
+        }
+        if (review.getUserId() == null) {
+            throw new ValidationException("ID пользователя должен быть указан");
+        }
+        if (review.getFilmId() == null) {
+            throw new ValidationException("ID фильма должен быть указан");
         }
     }
 
@@ -214,11 +210,11 @@ public class ReviewService {
      * Валидация отзыва и пользователя
      */
     private void validateReviewAndUser(long reviewId, long userId) {
-        if (!reviewStorage.getReviewById(reviewId).isPresent()) {
-            throw new NotFoundReviewException("Отзыв с ID " + reviewId + " не найден", reviewId);
-        }
+        reviewStorage.getReviewById(reviewId).orElseThrow(() -> {
+            throw new EntityNotFoundException("Отзыв с ID " + reviewId + " не найден", reviewId);
+        });
         if (!userStorage.containsUserById(userId)) {
-            throw new NotFoundUserByIdException("Пользователь с ID " + userId + " не найден", userId);
+            throw new EntityNotFoundException("Пользователь с ID " + userId + " не найден", userId);
         }
     }
 }

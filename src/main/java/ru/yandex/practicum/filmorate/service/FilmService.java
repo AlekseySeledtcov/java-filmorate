@@ -2,8 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.Event;
@@ -26,38 +24,29 @@ import java.util.List;
 @Service
 public class FilmService {
     @Autowired
-    @Qualifier("FilmDbStorage")
     private final FilmStorage filmStorage;
-    @Qualifier("UserDbStorage")
     private final UserStorage userStorage;
-    private final MpaStorage mpaStorage;
-    private final GenreStorage genreStorage;
     private final LikeStorage likeStorage;
     private final GenreService genreService;
     private final DirectorService directorService;
     private final ReviewStorage reviewStorage;
-    private final JdbcTemplate jdbc;
     private final EventService eventService;
 
-    public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
-                       @Qualifier("UserDbStorage") UserStorage userStorage,
+    public FilmService(FilmStorage filmStorage,
+                       UserStorage userStorage,
                        MpaStorage mpaStorage,
                        GenreStorage genreStorage,
                        LikeStorage likeStorage,
                        GenreService genreService,
                        DirectorService directorService,
                        ReviewStorage reviewStorage,
-                       JdbcTemplate jdbc,
                        EventService eventService) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
-        this.mpaStorage = mpaStorage;
-        this.genreStorage = genreStorage;
         this.likeStorage = likeStorage;
         this.genreService = genreService;
         this.directorService = directorService;
         this.reviewStorage = reviewStorage;
-        this.jdbc = jdbc;
         this.eventService = eventService;
     }
 
@@ -84,7 +73,7 @@ public class FilmService {
         film.setGenres(genreValidator(film.getGenres()));
 
         if (!filmStorage.containsFilmById(film.getId())) {
-            throw new NotFoundFilmException("Не найден фильм в методе updateFilm по id ", film.getId());
+            throw new EntityNotFoundException("Не найден фильм в методе updateFilm по id ", film.getId());
         }
 
         if (!film.getGenres().isEmpty()) {
@@ -105,10 +94,10 @@ public class FilmService {
 
     public Film putLikeToFilm(long filmId, long userId) {
         if (!filmStorage.containsFilmById(filmId)) {
-            throw new NotFoundFilmException("Не найден фильм в методе putLikeToFilm по filmId ", filmId);
+            throw new EntityNotFoundException("Не найден фильм в методе putLikeToFilm по filmId ", filmId);
         }
         if (!userStorage.containsUserById(userId)) {
-            throw new NotFoundUserByIdException("Не найден пользователь в методе putLikeToFilm по userId ", userId);
+            throw new EntityNotFoundException("Не найден пользователь в методе putLikeToFilm по userId ", userId);
         }
 
         likeStorage.putLike(userId, filmId);
@@ -122,8 +111,8 @@ public class FilmService {
                 userId, filmId, EventType.LIKE, Operation.ADD);
 
         Film film = filmStorage.getFilm(filmId).orElseThrow(() -> {
-            log.warn("FilmService, putLikeToFilm, фильм с id {} не найден", filmId);
-            throw new NotFoundFilmException(String.format("Фильм с id %d не найден", filmId), filmId);
+            log.warn("putLikeToFilm, фильм с id {} не найден", filmId);
+            return new EntityNotFoundException(String.format("Фильм с id %d не найден", filmId), filmId);
         });
 
         return addData(film);
@@ -131,10 +120,10 @@ public class FilmService {
 
     public Film deleteLikeToFilm(long filmId, long userId) {
         if (!filmStorage.containsFilmById(filmId)) {
-            throw new NotFoundFilmException("Не найден фильм в методе deleteLiketoFilm по filmId ", filmId);
+            throw new EntityNotFoundException("Не найден фильм в методе deleteLiketoFilm по filmId ", filmId);
         }
         if (!userStorage.containsUserById(userId)) {
-            throw new NotFoundUserByIdException("Не найден пользователь в методе deleteLiketoFilm по userId ", userId);
+            throw new EntityNotFoundException("Не найден пользователь в методе deleteLiketoFilm по userId ", userId);
         }
         likeStorage.deleteLike(filmId, userId);
         log.debug("Удалён лайк от пользователя с id {} к фильму с id {}", userId, filmId);
@@ -147,14 +136,14 @@ public class FilmService {
         log.debug("Добавление события в ленту: {}", event);
         eventService.addEvent(event);
         Film film = filmStorage.getFilm(filmId).orElseThrow(() -> {
-            log.warn("FilmService, deleteLikeToFilm, фильм с id {} не найден", filmId);
-            throw new NotFoundFilmException(String.format("Фильм с id %d не найден", filmId), filmId);
+            log.warn("deleteLikeToFilm, фильм с id {} не найден", filmId);
+            return new EntityNotFoundException(String.format("Фильм с id %d не найден", filmId), filmId);
         });
         return addData(film);
     }
 
     public List<Film> getPopularFilms(int limit, Integer genreId, Integer year) {
-        log.debug("FilmService. getPopularFilms. limit = {}, genreId = {}, year={}", limit, genreId, year);
+        log.debug("getPopularFilms. limit = {}, genreId = {}, year={}", limit, genreId, year);
 
         List<Film> films = filmStorage.getPopularFilms(year);
         films.forEach(this::addData);
@@ -170,8 +159,8 @@ public class FilmService {
 
     public Film getFilmWithGenreById(long id) {
         Film film = filmStorage.getFilm(id).orElseThrow(() -> {
-            log.warn("FilmService, getFilmWithGenreById, фильм с id {} не найден", id);
-            throw new NotFoundFilmException(String.format("Фильм с id %d не найден", id), id);
+            log.warn("getFilmWithGenreById, фильм с id {} не найден", id);
+            return new EntityNotFoundException(String.format("Фильм с id %d не найден", id), id);
         });
         return addData(film);
     }
@@ -179,20 +168,20 @@ public class FilmService {
     public List<Film> getFilmsByDirectorSorted(long directorId, String sortedBy) {
         List<Film> films = filmStorage.getFilmsByDirectorSorted(directorId, sortedBy);
         if (films == null || films.isEmpty()) {
-            throw new NotFoundEntityByIdException(String.format("Фильм с id директора %d не найден", directorId), directorId);
+            throw new EntityNotFoundException(String.format("Фильм с id директора %d не найден", directorId), directorId);
         }
         films.forEach(this::addData);
         return films;
     }
 
     public List<Film> getCommonFilms(long userId, long friendId) {
-        log.debug("FilmService. Получение общих фильмов для userId={} и friendId={}", userId, friendId);
+        log.debug("Получение общих фильмов для userId={} и friendId={}", userId, friendId);
 
         if (!userStorage.containsUserById(userId)) {
-            throw new NotFoundUserByIdException("Пользователь не найден", userId);
+            throw new EntityNotFoundException("Пользователь не найден", userId);
         }
         if (!userStorage.containsUserById(friendId)) {
-            throw new NotFoundUserByIdException("Друг не найден", friendId);
+            throw new EntityNotFoundException("Друг не найден", friendId);
         }
 
         List<Film> commonFilms = filmStorage.getCommonFilms(userId, friendId);
@@ -209,11 +198,11 @@ public class FilmService {
         List<Film> films = new ArrayList<>();
         String[] byArr = by.replaceAll("\\s+", "").split(",");
 
-        for (String s : byArr) {
-            if (s.equals("director")) {
+        for (String string : byArr) {
+            if (string.equals("director")) {
                 films.addAll(filmStorage.getFilmsSearchByDirector("%" + query.toLowerCase() + "%"));
             }
-            if (s.equals("title")) {
+            if (string.equals("title")) {
                 films.addAll(filmStorage.getFilmsSearchByTitle("%" + query.toLowerCase() + "%"));
             }
         }
@@ -229,10 +218,10 @@ public class FilmService {
     }
 
     public void deleteFilm(long id) {
-        log.debug("Сервис. deleteFilm Удаление фильма с id {}", id);
+        log.debug("deleteFilm Удаление фильма с id {}", id);
 
         if (!filmStorage.containsFilmById(id)) {
-            throw new NotFoundFilmException("Не найден фильм для удаления по id ", id);
+            throw new EntityNotFoundException("Не найден фильм для удаления по id ", id);
         }
 
         likeStorage.deleteAllLikesForFilm(id);
@@ -242,7 +231,7 @@ public class FilmService {
 
         boolean wasDeleted = filmStorage.deleteFilm(id);
         if (!wasDeleted) {
-            throw new NotFoundFilmException("Не удалось удалить фильм по id ", id);
+            throw new EntityNotFoundException("Не удалось удалить фильм по id ", id);
         }
         log.debug("Фильм с id {} успешно удален: {}", id, wasDeleted);
     }

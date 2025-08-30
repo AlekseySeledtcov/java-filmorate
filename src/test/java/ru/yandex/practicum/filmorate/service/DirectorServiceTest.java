@@ -7,7 +7,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.controller.DirectorController;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundEntityByIdException;
+import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -71,18 +71,18 @@ public class DirectorServiceTest {
 
     @Test
     void getDirectorByIdIfNotExistTest() {
-        assertThrows(NotFoundEntityByIdException.class, () -> directorController.getDirectorById(15L));
+        assertThrows(EntityNotFoundException.class, () -> directorController.getDirectorById(15L));
     }
 
     @Test
     void putDirectorIfNotExistTest() {
         director1.setId(15L);
-        assertThrows(NotFoundEntityByIdException.class, () -> directorController.putDirector(director1));
+        assertThrows(EntityNotFoundException.class, () -> directorController.putDirector(director1));
     }
 
     @Test
     void deleteDirectorIfNotExistTest() {
-        assertThrows(NotFoundEntityByIdException.class, () -> directorController.deleteDirector(15L));
+        assertThrows(EntityNotFoundException.class, () -> directorController.deleteDirector(15L));
     }
 
     @Test

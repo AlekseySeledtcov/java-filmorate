@@ -4,13 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.DuplicatedDataException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundFriendshipException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByFriendIdException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundUserByIdException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.Event;
-import ru.yandex.practicum.filmorate.model.FriendsList;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
@@ -21,7 +16,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,11 +26,10 @@ public class UserService {
     private final FriendListStorage friendListStorage;
     private final LikeStorage likeStorage;
     private final ReviewStorage reviewStorage;
-    private final JdbcTemplate jdbc;
     private final EventService eventService;
 
-    public UserService(@Qualifier("UserDbStorage") UserStorage userStorage,
-                       @Qualifier("FriendListDbStorage") FriendListStorage friendListStorage,
+    public UserService(UserStorage userStorage,
+                       FriendListStorage friendListStorage,
                        LikeStorage likeStorage,
                        ReviewStorage reviewStorage,
                        JdbcTemplate jdbc,
@@ -45,7 +38,6 @@ public class UserService {
         this.friendListStorage = friendListStorage;
         this.likeStorage = likeStorage;
         this.reviewStorage = reviewStorage;
-        this.jdbc = jdbc;
         this.eventService = eventService;
     }
 
@@ -59,7 +51,7 @@ public class UserService {
 
     public User update(User user) {
         if (!userStorage.containsUserById(user.getId())) {
-            throw new NotFoundUserByIdException("Не найден пользователь в методе update по id ", user.getId());
+            throw new EntityNotFoundException("Не найден пользователь в методе update по id ", user.getId());
         }
         return userStorage.updateUser(user);
     }
@@ -72,15 +64,15 @@ public class UserService {
 
     public List<User> deletingFromFriendList(long id, long friendId) {
         if (!userStorage.containsUserById(id)) {
-            throw new NotFoundUserByIdException("Не найден пользователь в методе deletingFromFriendList по id ", id);
+            throw new EntityNotFoundException("Не найден пользователь в методе deletingFromFriendList по id ", id);
         }
         if (!userStorage.containsUserById(friendId)) {
-            throw new NotFoundUserByFriendIdException("Не найден пользователь в методе deletingFromFriendList по friendId ",
+            throw new EntityNotFoundException("Не найден пользователь в методе deletingFromFriendList по friendId ",
                     friendId);
         }
         if (!friendListStorage.containsFriend(id, friendId)) {
-            throw new NotFoundFriendshipException(String.format("Для пользователя с id %d " +
-                    "не найден друг с id %d", id, friendId), id, friendId);
+            throw new EntityNotFoundException(String.format("Для пользователя с id %d " +
+                    "не найден друг", id), id);
         }
 
         friendListStorage.deleteFriend(id, friendId);
@@ -91,7 +83,7 @@ public class UserService {
                 .operation(Operation.REMOVE)
                 .build();
 
-        log.debug("UserService: Добавление события удаления друга: {}", event);
+        log.debug("Добавление события удаления друга: {}", event);
         eventService.addEvent(event);
         log.debug("Получение списка друзей у пользователя с id после удаления друга");
         return userStorage.getUserFriendsList(id);
@@ -99,17 +91,17 @@ public class UserService {
 
     public List<User> getUserFriendList(long id) {
         if (!userStorage.containsUserById(id)) {
-            throw new NotFoundUserByIdException("Не найден пользователь в методе getUserFriendList по id ", id);
+            throw new EntityNotFoundException("Не найден пользователь в методе getUserFriendList по id ", id);
         }
         return userStorage.getUserFriendsList(id);
     }
 
     public List<User> getUsersCommonFriendList(Long id, Long otherId) {
         if (!userStorage.containsUserById(id)) {
-            throw new NotFoundUserByIdException("Не найден пользователь в методе getUserCommonFriendList по id ", id);
+            throw new EntityNotFoundException("Не найден пользователь в методе getUserCommonFriendList по id ", id);
         }
         if (!userStorage.containsUserById(otherId)) {
-            throw new NotFoundUserByFriendIdException("Не найден пользователь в методе getUserCommonFriendList по otherId ",
+            throw new EntityNotFoundException("Не найден пользователь в методе getUserCommonFriendList по otherId ",
                     otherId);
         }
         return userStorage.getUsersCommonFriendList(id, otherId);
@@ -122,25 +114,12 @@ public class UserService {
         log.debug("Дружба между {} и {} подтверждена", userId, friendId);
     }
 
-    public List<User> getPendingFriendRequests(long userId) {
-        if (!userStorage.containsUserById(userId)) {
-            throw new NotFoundUserByIdException("Пользователь не найден", userId);
-        }
-
-        List<FriendsList> pendingRequests = friendListStorage.getFriendsWithStatus(userId, "PENDING");
-        List<Long> userIds = pendingRequests.stream()
-                .map(FriendsList::getUserId)
-                .collect(Collectors.toList());
-
-        return userStorage.getUsersByIds(userIds);
-    }
-
     private void validateUsers(long userId, long friendId) {
         if (!userStorage.containsUserById(userId)) {
-            throw new NotFoundUserByIdException("Пользователь не найден", userId);
+            throw new EntityNotFoundException("Пользователь не найден", userId);
         }
         if (!userStorage.containsUserById(friendId)) {
-            throw new NotFoundUserByFriendIdException("Пользователь не найден", friendId);
+            throw new EntityNotFoundException("Пользователь не найден", friendId);
         }
         if (userId == friendId) {
             throw new ValidationException("Нельзя добавить самого себя в друзья");
@@ -154,7 +133,7 @@ public class UserService {
             throw new DuplicatedDataException("Пользователь уже в списке друзей");
         }
 
-        log.debug("Сервис. Добавление пользователю с id {} друга с friendId {}", userId, friendId);
+        log.debug("Добавление пользователю с id {} друга с friendId {}", userId, friendId);
         friendListStorage.addFriend(userId, friendId);
         Event event = Event.builder()
                 .userId(userId)
@@ -162,17 +141,17 @@ public class UserService {
                 .eventType(EventType.FRIEND)
                 .operation(Operation.ADD)
                 .build();
-        log.debug("UserService: Добавление события в ленту: {}", event);
+        log.debug("Добавление события в ленту: {}", event);
         eventService.addEvent(event);
         return userStorage.getUserFriendsList(userId);
     }
 
 
     public void deleteUser(long id) {
-        log.debug("Сервис. deleteUser Удаление пользователя с id {}", id);
+        log.debug("deleteUser Удаление пользователя с id {}", id);
 
         if (!userStorage.containsUserById(id)) {
-            throw new NotFoundUserByIdException("Не найден пользователь для удаления по id ", id);
+            throw new EntityNotFoundException("Не найден пользователь для удаления по id ", id);
         }
 
         friendListStorage.deleteAllFriendsForUser(id);
@@ -182,17 +161,17 @@ public class UserService {
 
         boolean wasDeleted = userStorage.deleteUser(id);
         if (!wasDeleted) {
-            throw new NotFoundUserByIdException("Не удалось удалить пользователя по id ", id);
+            throw new EntityNotFoundException("Не удалось удалить пользователя по id ", id);
         }
         log.debug("Пользователь с id {} успешно удален: {}", id, wasDeleted);
     }
 
     public User getUserById(long id) {
         if (!userStorage.containsUserById(id)) {
-            throw new NotFoundUserByIdException("Не найден пользователь по id ", id);
+            throw new EntityNotFoundException("Не найден пользователь по id ", id);
         }
         return userStorage.getUser(id).orElseThrow(() ->
-                new NotFoundUserByIdException("Не найден пользователь по id ", id));
+                new EntityNotFoundException("Не найден пользователь по id ", id));
     }
 
     private User userValidator(User user) {

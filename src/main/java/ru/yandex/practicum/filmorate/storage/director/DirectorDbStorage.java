@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.director;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -12,7 +11,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-@Qualifier("DirectorDbStorage")
 @Repository
 public class DirectorDbStorage extends BaseStorage<Director> implements DirectorStorage {
     public DirectorDbStorage(JdbcTemplate jdbc, RowMapper<Director> mapper) {
@@ -32,19 +30,19 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
 
     @Override
     public List<Director> getDirectors() {
-        log.debug("DirectorDbStorage. getDirectors");
+        log.debug("getDirectors Поулчение списка режиссеров");
         return findMany(GET_ALL_DIRECTORS_QUERY);
     }
 
     @Override
     public Optional<Director> getDirectorById(long id) {
-        log.debug("DirectorDbStorage. getDirectorById id={}", id);
+        log.debug("getDirectorById id={}", id);
         return findOne(GET_DIRECTOR_BY_ID_QUERY, id);
     }
 
     @Override
     public Director postDirector(Director director) {
-        log.debug("DirectorDbStorage. postDirector name={}", director.getName());
+        log.debug("postDirector name={}", director.getName());
         long id = insert(POST_DIRECTOR_QUERY, director.getName());
         director.setId(id);
         return director;
@@ -52,14 +50,14 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
 
     @Override
     public Director putDirector(Director director) {
-        log.debug("DirectorDbStorage. putDirector name={}", director.getName());
+        log.debug("putDirector name={}", director.getName());
         update(PUT_DIRECTOR_QUERY, director.getName(), director.getId());
         return director;
     }
 
     @Override
     public void deleteDirector(long id) {
-        log.debug("DirectorDbStorage. deleteDirector id={}", id);
+        log.debug("deleteDirector id={}", id);
         jdbc.update(DELETE_DIRECTOR_BY_ID_QUERY, id);
     }
 
@@ -71,18 +69,19 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
 
     @Override
     public void deleteDirectorsFromFilm(long id) {
-        log.debug("DirectorDbStorage. deleteDirectorsFromFilm id={}", id);
+        log.debug("deleteDirectorsFromFilm id={}", id);
         jdbc.update(DELETE_DIRECTORS_FROM_FILM_QUERY, id);
     }
 
     @Override
-    public void putDirectorsToFilm(long directorId, long filmId) {
+    public void putDirectorsToFilm(long filmId, long directorId) {
+        log.debug("putDirectorsToFilm filmId={}", filmId);
         jdbc.update(PUT_DIRECTORS_TO_FILM, filmId, directorId);
     }
 
     @Override
     public List<Director> getDirectorsByFilmId(long id) {
-        log.debug("DirectorDbStorage. getDirectorsByFilmId id={}", id);
+        log.debug("getDirectorsByFilmId id={}", id);
         return findMany(GET_ALL_DIRECTORS_BY_FILM_ID_QUERY, id);
     }
 }

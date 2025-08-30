@@ -20,13 +20,13 @@ public class MpaController {
 
     @GetMapping
     public List<Mpa> getAllMpa() {
-        log.debug("MpaController, getAllMpa");
+        log.debug("getAllMpa");
         return mpaService.getAllMpa();
     }
 
     @GetMapping("/{id}")
     public Mpa getMpaById(@PathVariable("id") long id) {
-        log.debug("MpaController, getMpaById = {}", id);
+        log.debug("getMpaById = {}", id);
         return mpaService.getMpaById(id);
     }
 }

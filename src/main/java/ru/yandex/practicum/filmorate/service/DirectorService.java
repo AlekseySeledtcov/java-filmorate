@@ -1,9 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundEntityByIdException;
+import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 
@@ -14,7 +13,7 @@ import java.util.List;
 public class DirectorService {
     private final DirectorStorage directorDbStorage;
 
-    public DirectorService(@Qualifier("DirectorDbStorage") DirectorStorage directorDbStorage) {
+    public DirectorService(DirectorStorage directorDbStorage) {
         this.directorDbStorage = directorDbStorage;
     }
 
@@ -24,8 +23,8 @@ public class DirectorService {
 
     public Director getDirectorById(long id) {
         return directorDbStorage.getDirectorById(id).orElseThrow(() -> {
-                    log.warn("DirectorService, getDirectorById, режисер с id {} не найден", id);
-                    throw new NotFoundEntityByIdException("Режиссер не найден", id);
+                    log.warn("getDirectorById, режисер с id {} не найден", id);
+                    return new EntityNotFoundException("Режиссер не найден", id);
                 }
         );
     }
@@ -36,16 +35,16 @@ public class DirectorService {
 
     public Director putDirector(Director director) {
         if (!directorDbStorage.containsDirectorById(director.getId())) {
-            log.warn("DirectorService, putDirector, режисер с id {} не найден", director.getId());
-            throw new NotFoundEntityByIdException("Режиссер не найден", director.getId());
+            log.warn("putDirector, режисер с id {} не найден", director.getId());
+            throw new EntityNotFoundException("Режиссер не найден", director.getId());
         }
         return directorDbStorage.putDirector(director);
     }
 
     public void deleteDirector(long id) {
         if (!directorDbStorage.containsDirectorById(id)) {
-            log.warn("DirectorService, deleteDirector, режисер с id {} не найден", id);
-            throw new NotFoundEntityByIdException("Режиссер не найден по id", id);
+            log.warn("deleteDirector, режисер с id {} не найден", id);
+            throw new EntityNotFoundException("Режиссер не найден по id", id);
         }
         directorDbStorage.deleteDirector(id);
     }
@@ -55,9 +54,7 @@ public class DirectorService {
     }
 
     public void putDirectorsToFilm(List<Director> directors, long filmId) {
-        for (Director director : directors) {
-            directorDbStorage.putDirectorsToFilm(director.getId(), filmId);
-        }
+        directors.forEach(director -> directorDbStorage.putDirectorsToFilm(filmId, director.getId()));
     }
 
     public List<Director> getDirectorsByFilmId(long id) {

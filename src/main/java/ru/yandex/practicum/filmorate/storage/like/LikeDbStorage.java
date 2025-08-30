@@ -26,36 +26,36 @@ public class LikeDbStorage extends BaseStorage<Like> implements LikeStorage {
 
     @Override
     public void putLike(long userId, long filmId) {
-        log.debug("Хранилище. putLike userId {}, filmId {}", userId, filmId);
+        log.debug("putLike userId {}, filmId {}", userId, filmId);
         jdbc.update(PUT_LIKE_QUERY, filmId, userId);
     }
 
     @Override
     public boolean containsLike(long userId, long filmId) {
-        log.debug("Хранилище. containsLike userId {}, filmId {}", userId, filmId);
+        log.debug("containsLike userId {}, filmId {}", userId, filmId);
         return findOne(GET_LIKE_BY_ID_QUERY, filmId, userId).isPresent();
     }
 
     public void deleteLike(long filmId, long userId) {
-        log.debug("Хранилище. deleteLike filmId {}, userId {}", filmId, userId);
+        log.debug("deleteLike filmId {}, userId {}", filmId, userId);
         jdbc.update(DELETE_LIKE_QUERY, filmId, userId);
     }
 
     public List<Like> getLikeListsByFilmId(long filmId) {
-        log.debug("Хранилище. getLikeListsByFilmId filmId {}", filmId);
+        log.debug("getLikeListsByFilmId filmId {}", filmId);
         return findMany(GET_LIKELIST_BY_FILM_ID, filmId);
     }
 
     @Override
     public void deleteAllLikesForFilm(long filmId) {
-        log.debug("Хранилище. deleteAllLikesForFilm filmId {}", filmId);
+        log.debug("deleteAllLikesForFilm filmId {}", filmId);
         // ЗАМЕНА: используем jdbc.update вместо BaseStorage.update
         jdbc.update(DELETE_ALL_LIKES_FOR_FILM_QUERY, filmId);
     }
 
     @Override
     public void deleteAllLikesForUser(long userId) {
-        log.debug("Хранилище. deleteAllLikesForUser userId {}", userId);
+        log.debug("deleteAllLikesForUser userId {}", userId);
         // ЗАМЕНА: используем jdbc.update вместо BaseStorage.update
         jdbc.update(DELETE_ALL_LIKES_FOR_USER_QUERY, userId);
     }
