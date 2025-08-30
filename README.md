@@ -1,26 +1,97 @@
 # java-filmorate
-## Промежуточное задание 12 спринта, составление ER диаграммы 
-![ER-диаграмма](db/Filmorate.png)
+_________________
 
-Получение списка фильмов:
-SELECT name,
-       dexcription,
-       releaseDate,
-       duration
-FROM film;
+## Групповой проект 13 спринта
+_____________
 
-Получение топ 10 списка фильмов по лайкам:
-SELECT film.*,
-       COUNT(ll.user_id) AS likes_count
-FROM film
-JOIN like_list AS ll ON film.film_id = ll.film_id
-GROUP BY film.id
-ORDER BY likes_count DESC
-LIMIT 10;
+![ER-диаграмма](/src/main/resources/Filmorate.png)
 
-Получение списка друзей пользователя: 
-SELECT u.*,
-       COUNT(fl.friends_list)
-FROM USER AS u
-JOIN friends_list AS fl ON u.user_id = fl.user_id
+## Java Filmorate
+
+### Описание проекта
+Java Filmorate — это платформа для управления фильмами, пользователями и их взаимодействия. Проект включает в себя различные функциональные возможности для работы с фильмами, пользователями, отзывами и рекомендациями.
+
+### Основные возможности
+
+* **Управление фильмами**
+       * Создание, редактирование, удаление фильмов
+       * Поиск по названию и режиссёру
+       * Фильтрация по жанрам и годам
+
+* **Система рекомендаций**
+       * Персонализированные рекомендации на основе предпочтений
+       * Анализ схожести пользователей
+       * Предложение фильмов на основе лайков
+
+* **Социальные функции**
+       * Добавление друзей
+       * Просмотр общих фильмов
+       * Лента активности
+
+* **Система отзывов**
+       * Создание и редактирование отзывов
+       * Рейтинговая система
+       * Оценка полезности отзывов
+
+* **Аналитика**
+       * Популярные фильмы
+       * Топ-N фильмов по лайкам
+       * Фильтрация по жанрам и годам
+
+### API документация
+
+#### Фильмы
+* **Поиск фильмов**
+  GET /films/search
+  Параметры:
+  query - поисковый запрос
+  by - director/title/director,title
+
+
+* **Популярные фильмы**
+  GET /films/popular
+  Параметры:
+  count - количество фильмов
+  genreId - фильтр по жанру
+  year - фильтр по году
+
+
+* **Общие фильмы**
+  GET /films/common
+  Параметры:
+  userId - ID пользователя
+  friendId - ID друга
+
+
+#### Пользователи
+* **Рекомендации**
+  GET /users/{id}/recommendations
+
+
+* **Лента событий**
+  GET /users/{id}/feed
+
+
+#### Отзывы
+* **Работа с отзывами**
+  POST /reviews - создание
+  PUT /reviews - обновление
+  DELETE /reviews/{id} - удаление
+  GET /reviews/{id} - получение
+
+
+#### Примеры использования
+##### Поиск фильмов
+curl "http://localhost:8080/films/search?query=крад&by=director,title"
+
+##### Получение рекомендаций
+curl "http://localhost:8080/users/1/recommendations"
+
+###### Создание отзыва
+curl -X POST http://localhost:8080/reviews -H "Content-Type: application/json" -d '{
+"content": "Отличный фильм!",
+"isPositive": true,
+"userId": 1,
+"filmId": 1
+}'
 
