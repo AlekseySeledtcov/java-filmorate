@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.Event;
@@ -20,9 +18,7 @@ import java.util.List;
 @Slf4j
 @Service
 public class UserService {
-    @Qualifier("UserDbStorage")
     private final UserStorage userStorage;
-    @Qualifier("FriendListDbStorage")
     private final FriendListStorage friendListStorage;
     private final LikeStorage likeStorage;
     private final ReviewStorage reviewStorage;
@@ -32,7 +28,6 @@ public class UserService {
                        FriendListStorage friendListStorage,
                        LikeStorage likeStorage,
                        ReviewStorage reviewStorage,
-                       JdbcTemplate jdbc,
                        EventService eventService) {
         this.userStorage = userStorage;
         this.friendListStorage = friendListStorage;

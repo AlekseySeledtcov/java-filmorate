@@ -11,8 +11,6 @@ import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -34,8 +32,6 @@ public class FilmService {
 
     public FilmService(FilmStorage filmStorage,
                        UserStorage userStorage,
-                       MpaStorage mpaStorage,
-                       GenreStorage genreStorage,
                        LikeStorage likeStorage,
                        GenreService genreService,
                        DirectorService directorService,
