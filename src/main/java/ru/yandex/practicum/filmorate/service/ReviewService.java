@@ -2,7 +2,8 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.*;
+import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
@@ -37,6 +38,7 @@ public class ReviewService {
     public Review addReview(Review review) {
         log.debug("Добавление отзыва: {}", review);
 
+        validateReview(review);
         validateUserAndFilm(review);
 
         if (review.getUseful() == null) {
@@ -44,8 +46,6 @@ public class ReviewService {
         }
 
         Review createdReview = reviewStorage.addReview(review);
-
-        // Добавляем событие после сохранения
         Event event = Event.builder()
                 .userId(createdReview.getUserId())
                 .entityId(createdReview.getReviewId())
@@ -56,7 +56,7 @@ public class ReviewService {
         log.debug("Добавление события в ленту: {}", event);
         eventService.addEvent(event);
 
-        return createdReview;  // тут возвращаем результат reviewStorage.addReview(review)
+        return createdReview;
     }
 
 
@@ -69,14 +69,11 @@ public class ReviewService {
         if (review.getReviewId() == null) {
             throw new ValidationException("ID отзыва должен быть указан");
         }
-        if (review.getContent() == null || review.getContent().trim().isEmpty()) {
-            throw new ValidationException("Содержание отзыва не может быть пустым");
-        }
-        if (review.getIsPositive() == null) {
-            throw new ValidationException("Тип отзыва должен быть указан");
-        }
+
+        validateReview(review);
+        validateUserAndFilm(review);
+
         Review updatedReview = reviewStorage.updateReview(review);
-        // Создаем и добавляем событие
         Event event = Event.builder()
                 .userId(updatedReview.getUserId())
                 .entityId(updatedReview.getReviewId())
@@ -174,6 +171,18 @@ public class ReviewService {
     }
 
     /**
+     * Валидация отзыва (вынесена в отдельный метод)
+     */
+    private void validateReview(Review review) {
+        if (review.getContent() == null || review.getContent().trim().isEmpty()) {
+            throw new ValidationException("Содержание отзыва не может быть пустым");
+        }
+        if (review.getIsPositive() == null) {
+            throw new ValidationException("Тип отзыва должен быть указан");
+        }
+    }
+
+    /**
      * Валидация пользователя и фильма
      */
     private void validateUserAndFilm(Review review) {
@@ -192,18 +201,6 @@ public class ReviewService {
             throw new EntityNotFoundException("Фильм с ID " + review.getFilmId() + " не найден", review.getFilmId());
         }
 
-        if (review.getContent() == null || review.getContent().trim().isEmpty()) {
-            throw new ValidationException("Содержание отзыва не может быть пустым");
-        }
-        if (review.getIsPositive() == null) {
-            throw new ValidationException("Тип отзыва должен быть указан");
-        }
-        if (review.getUserId() == null) {
-            throw new ValidationException("ID пользователя должен быть указан");
-        }
-        if (review.getFilmId() == null) {
-            throw new ValidationException("ID фильма должен быть указан");
-        }
     }
 
     /**

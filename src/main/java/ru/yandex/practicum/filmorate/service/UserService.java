@@ -2,7 +2,9 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.*;
+import ru.yandex.practicum.filmorate.exceptions.DuplicatedDataException;
+import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
@@ -37,7 +39,7 @@ public class UserService {
     }
 
     public User addUser(User user) {
-        userValidator(user);
+
         if (userStorage.containsUserByEmail(user.getEmail())) {
             throw new DuplicatedDataException("Данный пользователь уже есть");
         }
@@ -168,12 +170,4 @@ public class UserService {
         return userStorage.getUser(id).orElseThrow(() ->
                 new EntityNotFoundException("Не найден пользователь по id ", id));
     }
-
-    private User userValidator(User user) {
-        if (user.getName() == null || user.getName().trim().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-        return user;
-    }
-
 }

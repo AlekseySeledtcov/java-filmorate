@@ -44,7 +44,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     "mr.mpa_id, mr.mpa_name, COUNT(ll.film_id) AS like_count " +
                     "FROM film AS f " +
                     "JOIN mpa_rating AS mr ON f.rating_id = mr.mpa_id " +
-                    "LEFT JOIN like_list AS ll ON f.id = ll.film_id " + // LEFT JOIN вместо JOIN
+                    "LEFT JOIN like_list AS ll ON f.id = ll.film_id " +
                     "GROUP BY f.id, f.name, f.description, f.releasedate, f.duration, mr.mpa_id, mr.mpa_name " +
                     "ORDER BY like_count DESC " +
                     "LIMIT ?";
@@ -84,7 +84,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     "mr.mpa_id, mr.mpa_name, COUNT(ll.film_id) AS like_count " +
                     "FROM film AS f " +
                     "JOIN mpa_rating AS mr ON f.rating_id = mr.mpa_id " +
-                    "LEFT JOIN like_list AS ll ON f.id = ll.film_id " + // LEFT JOIN вместо JOIN
+                    "LEFT JOIN like_list AS ll ON f.id = ll.film_id " +
                     "WHERE EXTRACT(YEAR FROM releasedate) = ?" +
                     "GROUP BY f.id, f.name, f.description, f.releasedate, f.duration, mr.mpa_id, mr.mpa_name " +
                     "ORDER BY like_count DESC ";
@@ -94,7 +94,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                     "mr.mpa_id, mr.mpa_name, COUNT(ll.film_id) AS like_count " +
                     "FROM film AS f " +
                     "JOIN mpa_rating AS mr ON f.rating_id = mr.mpa_id " +
-                    "LEFT JOIN like_list AS ll ON f.id = ll.film_id " + // LEFT JOIN вместо JOIN
+                    "LEFT JOIN like_list AS ll ON f.id = ll.film_id " +
                     "GROUP BY f.id, f.name, f.description, f.releasedate, f.duration, mr.mpa_id, mr.mpa_name " +
                     "ORDER BY like_count DESC";
 

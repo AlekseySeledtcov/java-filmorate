@@ -7,7 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -16,7 +20,8 @@ import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -103,8 +108,6 @@ class FilmDbStorageTest {
         likeStorage.putLike(1, newFilm1.getId());
         likeStorage.putLike(1, newFilm2.getId());
         likeStorage.putLike(2, newFilm2.getId());
-        //List<Film> popularFilms = filmService.getPopularFilmList(3);
-        //assertTrue(popularFilms.get(0).getLikesCount() > popularFilms.get(1).getLikesCount());
     }
 
     @Test

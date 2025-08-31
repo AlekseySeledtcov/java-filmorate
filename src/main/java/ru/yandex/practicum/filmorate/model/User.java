@@ -1,9 +1,10 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Past;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,31 +16,42 @@ import java.util.Set;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class User {
     private Long id;
+
     @NotEmpty
     @Email
     private String email;
+
     @Login
     private String login;
+
     private String name;
+
     @Past
     private LocalDate birthday;
-    private Set<Long> friendsList;
 
-    public User(String email, String login, String name, LocalDate birthday) {
-        id = 0L;
+    @Builder.Default
+    private Set<Long> friendsList = new HashSet<>();
+
+    public void setName(String name) {
+        this.name = (name == null || name.trim().isEmpty()) ? this.login : name;
+    }
+
+    @JsonCreator
+    public User(
+            @JsonProperty("id") Long id,
+            @JsonProperty("email") String email,
+            @JsonProperty("login") String login,
+            @JsonProperty("name") String name,
+            @JsonProperty("birthday") LocalDate birthday,
+            @JsonProperty("friendsList") Set<Long> friendsList) {
+        this.id = id;
         this.email = email;
         this.login = login;
-        this.name = name == null ? login : name;
+        this.setName(name);
         this.birthday = birthday;
-        this.friendsList = new HashSet<>();
-    }
-
-    public void updateUserFriendsList(long friendId) {
-        friendsList.add(friendId);
+        this.friendsList = friendsList != null ? friendsList : new HashSet<>();
     }
 }
-

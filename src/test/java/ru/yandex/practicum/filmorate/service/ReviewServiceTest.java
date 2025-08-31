@@ -6,7 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.yandex.practicum.filmorate.exceptions.*;
+import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.Review;
@@ -47,9 +48,26 @@ class ReviewServiceTest {
 
     @BeforeEach
     void setUp() {
-        user1 = new User("user1@mail.ru", "user1", "User One", LocalDate.of(1990, 1, 1));
-        user2 = new User("user2@mail.ru", "user2", "User Two", LocalDate.of(1990, 1, 1));
-        user3 = new User("user3@mail.ru", "user3", "User Three", LocalDate.of(1990, 1, 1));
+        user1 = User.builder()
+                .email("user1@mail.ru")
+                .login("user1")
+                .name("User One")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .build();
+
+        user2 = User.builder()
+                .email("user2@mail.ru")
+                .login("user2")
+                .name("User Two")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .build();
+
+        user3 = User.builder()
+                .email("user3@mail.ru")
+                .login("user3")
+                .name("User Three")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .build();
 
         user1 = userService.addUser(user1);
         user2 = userService.addUser(user2);
