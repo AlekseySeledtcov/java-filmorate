@@ -46,11 +46,29 @@ class ReviewControllerTest {
     private Film film1;
     private Film film2;
 
+
     @BeforeEach
     void setUp() {
-        user1 = new User("user1@mail.ru", "user1", "User One", LocalDate.of(1990, 1, 1));
-        user2 = new User("user2@mail.ru", "user2", "User Two", LocalDate.of(1990, 1, 1));
-        user3 = new User("user3@mail.ru", "user3", "User Three", LocalDate.of(1990, 1, 1));
+        user1 = User.builder()
+                .email("user1@mail.ru")
+                .login("user1")
+                .name("User One")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .build();
+
+        user2 = User.builder()
+                .email("user2@mail.ru")
+                .login("user2")
+                .name("User Two")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .build();
+
+        user3 = User.builder()
+                .email("user3@mail.ru")
+                .login("user3")
+                .name("User Three")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .build();
 
         user1 = userService.addUser(user1);
         user2 = userService.addUser(user2);
@@ -226,7 +244,6 @@ class ReviewControllerTest {
         Review createdReview = reviewController.addReview(review);
 
         reviewController.addDislike(createdReview.getReviewId(), user2.getId());
-
         Review updatedReview = reviewController.getReviewById(createdReview.getReviewId());
         assertEquals(-1, updatedReview.getUseful());
     }

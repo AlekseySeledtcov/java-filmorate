@@ -23,10 +23,9 @@ public class DirectorService {
 
     public Director getDirectorById(long id) {
         return directorDbStorage.getDirectorById(id).orElseThrow(() -> {
-                    log.warn("getDirectorById, режисер с id {} не найден", id);
-                    return new EntityNotFoundException("Режиссер не найден", id);
-                }
-        );
+            log.warn("getDirectorById, режиссер с id {} не найден", id);
+            return new EntityNotFoundException("Режиссер не найден", id);
+        });
     }
 
     public Director postDirector(Director director) {
@@ -35,7 +34,7 @@ public class DirectorService {
 
     public Director putDirector(Director director) {
         if (!directorDbStorage.containsDirectorById(director.getId())) {
-            log.warn("putDirector, режисер с id {} не найден", director.getId());
+            log.warn("putDirector, режиссер с id {} не найден", director.getId());
             throw new EntityNotFoundException("Режиссер не найден", director.getId());
         }
         return directorDbStorage.putDirector(director);
@@ -43,7 +42,7 @@ public class DirectorService {
 
     public void deleteDirector(long id) {
         if (!directorDbStorage.containsDirectorById(id)) {
-            log.warn("deleteDirector, режисер с id {} не найден", id);
+            log.warn("deleteDirector, режиссер с id {} не найден", id);
             throw new EntityNotFoundException("Режиссер не найден по id", id);
         }
         directorDbStorage.deleteDirector(id);
