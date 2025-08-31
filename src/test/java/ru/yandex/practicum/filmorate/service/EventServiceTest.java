@@ -28,20 +28,20 @@ public class EventServiceTest {
 
     @Test
     public void testGetAllEventsByUserId() {
-        User user1 = User.builder()
-                .email("email@1gmail.com")
-                .login("login1")
-                .name("name 1")
-                .birthday(LocalDate.now())
-                .build();
+        User user1 = new User(
+                "email@1gmail.com",
+                "login1",
+                "name 1",
+                LocalDate.now()
+        );
         user1 = userDbStorage.addUser(user1);
 
-        User user2 = User.builder()
-                .email("email@2gmail.com")
-                .login("login2")
-                .name("name 2")
-                .birthday(LocalDate.now())
-                .build();
+        User user2 = new User(
+                "email@2gmail.com",
+                "login2",
+                "name 2",
+                LocalDate.now()
+        );
         user2 = userDbStorage.addUser(user2);
 
         userService.addToFriendsList(user1.getId(), user2.getId());

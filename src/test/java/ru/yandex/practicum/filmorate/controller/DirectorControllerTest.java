@@ -53,6 +53,8 @@ public class DirectorControllerTest {
     @Test
     void getDirectorByIdTest() {
         Director expected = directorController.getDirectorById(director3.getId());
+        System.out.println(directorController.getDirectorById(director3.getId()));
+        System.out.println(director3);
         assertEquals(expected, director3, "Данные не совпадают");
     }
 

@@ -22,29 +22,21 @@ import java.util.List;
 @Builder
 public class Film {
     private Long id;
-
     @NotEmpty
     @NotBlank
     private String name;
-
     @Size(max = 200)
     private String description;
-
     @After1895
     private LocalDate releaseDate;
-
     @Positive
     private Integer duration;
-
     @Builder.Default
     private long likesCount = 0;
-
     @Builder.Default
     private List<Genre> genres = new ArrayList<>();
-
     @Builder.Default
     private List<Director> directors = new ArrayList<>();
-
     private Mpa mpa;
 
     public void setDescription(String description) {

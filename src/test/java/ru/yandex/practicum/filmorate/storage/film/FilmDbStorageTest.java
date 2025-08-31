@@ -56,20 +56,19 @@ class FilmDbStorageTest {
                 .mpa(new Mpa(5, "NC-17"))
                 .build();
 
-        newUser1 = User.builder()
-                .name("Theodore Deckow")
-                .email("Quentin_Gislason@gmail.com")
-                .login("Quentin_Gislason@gmail.com")
-                .birthday(LocalDate.of(1979, 03, 14))
-                .build();
+        newUser1 =  new User(
+                "Theodore Deckow",
+                "Quentin_Gislason@gmail.com",
+                "Quentin_Gislason@gmail.com",
+                LocalDate.of(1979, 03, 14)
+        );
 
-        newUser2 = User.builder()
-                .name("Jeannie Graham")
-                .email("Justyn44@gmail.com")
-                .login("4UFuPkNVbG")
-                .birthday(LocalDate.of(2004, 06, 9))
-                .build();
-
+        newUser2 = new User(
+                "Jeannie Graham",
+                "Justyn44@gmail.com",
+                "4UFuPkNVbG",
+                LocalDate.of(2004, 06, 9)
+        );
         directorService.postDirector(new Director("Квентин Тарантино"));
     }
 
@@ -103,8 +102,6 @@ class FilmDbStorageTest {
         likeStorage.putLike(1, newFilm1.getId());
         likeStorage.putLike(1, newFilm2.getId());
         likeStorage.putLike(2, newFilm2.getId());
-        //List<Film> popularFilms = filmService.getPopularFilmList(3);
-        //assertTrue(popularFilms.get(0).getLikesCount() > popularFilms.get(1).getLikesCount());
     }
 
     @Test

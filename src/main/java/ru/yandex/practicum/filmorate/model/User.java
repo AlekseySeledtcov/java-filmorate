@@ -1,22 +1,17 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Past;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.yandex.practicum.filmorate.annotations.Login;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
-@NoArgsConstructor
-@Builder
+@Getter
+@Setter
 public class User {
     private Long id;
     @NotEmpty
@@ -27,27 +22,14 @@ public class User {
     private String name;
     @Past
     private LocalDate birthday;
+    private Set<Long> friendsList;
 
-    @Builder.Default
-    private Set<Long> friendsList = new HashSet<>();
-
-    public void setName(String name) {
-        this.name = (name == null || name.trim().isEmpty()) ? this.login : name;
-    }
-
-    @JsonCreator
-    public User(
-            @JsonProperty("id") Long id,
-            @JsonProperty("email") String email,
-            @JsonProperty("login") String login,
-            @JsonProperty("name") String name,
-            @JsonProperty("birthday") LocalDate birthday,
-            @JsonProperty("friendsList") Set<Long> friendsList) {
-        this.id = id;
+    public User(String email, String login, String name, LocalDate birthday) {
+        this.id = 0L;
         this.email = email;
         this.login = login;
-        this.setName(name);
+        this.name = (name == null || name == "") ? login : name;
         this.birthday = birthday;
-        this.friendsList = friendsList != null ? friendsList : new HashSet<>();
+        this.friendsList = new HashSet<>();
     }
 }

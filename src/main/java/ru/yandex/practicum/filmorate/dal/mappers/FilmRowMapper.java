@@ -15,6 +15,7 @@ public class FilmRowMapper implements RowMapper<Film> {
     @Override
     public Film mapRow(ResultSet resultSet, int rowNum) throws SQLException {
         Film film = new Film();
+
         film.setId(resultSet.getLong("id"));
         film.setName(resultSet.getString("name"));
         film.setDescription(resultSet.getString("description"));
@@ -25,7 +26,7 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setDuration(resultSet.getInt("duration"));
         film.setMpa(new Mpa(resultSet.getInt("mpa_id"), resultSet.getString("mpa_name")));
 
-        // Добавляем количество лайков, если есть в результате
+//         Добавляем количество лайков, если есть в результате
         try {
             film.setLikesCount(resultSet.getLong("like_count"));
         } catch (SQLException exception) {
