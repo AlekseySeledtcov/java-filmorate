@@ -49,14 +49,12 @@ public class LikeDbStorage extends BaseStorage<Like> implements LikeStorage {
     @Override
     public void deleteAllLikesForFilm(long filmId) {
         log.debug("deleteAllLikesForFilm filmId {}", filmId);
-        // ЗАМЕНА: используем jdbc.update вместо BaseStorage.update
         jdbc.update(DELETE_ALL_LIKES_FOR_FILM_QUERY, filmId);
     }
 
     @Override
     public void deleteAllLikesForUser(long userId) {
         log.debug("deleteAllLikesForUser userId {}", userId);
-        // ЗАМЕНА: используем jdbc.update вместо BaseStorage.update
         jdbc.update(DELETE_ALL_LIKES_FOR_USER_QUERY, userId);
     }
 }

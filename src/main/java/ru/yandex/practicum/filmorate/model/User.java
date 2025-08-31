@@ -37,9 +37,5 @@ public class User {
         this.birthday = birthday;
         this.friendsList = new HashSet<>();
     }
-
-    public void updateUserFriendsList(long friendId) {
-        friendsList.add(friendId);
-    }
 }
 

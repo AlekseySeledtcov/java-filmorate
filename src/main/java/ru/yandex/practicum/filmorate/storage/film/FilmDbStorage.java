@@ -202,7 +202,6 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         return findMany(query, userId);
     }
 
-
     @Override
     public boolean deleteFilm(long id) {
         log.debug("deleteFilm Удаление фильма с id {}", id);
