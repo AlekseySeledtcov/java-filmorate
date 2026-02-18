@@ -21,13 +21,13 @@ public class MpaDbStorage extends BaseStorage<Mpa> implements MpaStorage {
 
     @Override
     public List<Mpa> getAllMpa() {
-        log.debug("MpaDbStorage. getAllMpa");
+        log.debug("getAllMpa");
         return findMany(GET_ALL_QUERY);
     }
 
     @Override
     public Mpa getMpaById(long id) {
-        log.debug("MpaDbStorage. getMpaById id {}", id);
+        log.debug("getMpaById id {}", id);
         return findOne(GET_MPA_BY_ID_QUERY, id).get();
     }
 }

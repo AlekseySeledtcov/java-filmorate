@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundGenreException;
+import ru.yandex.practicum.filmorate.exceptions.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
@@ -24,7 +24,7 @@ public class GenreService {
 
     public Genre getGenreById(long id) {
         return genreStorage.getGenreById(id).orElseThrow(() -> {
-            throw new NotFoundGenreException(String.format("Жанр по id не найден", id), id);
+            return new EntityNotFoundException(String.format("Жанр по id %d не найден", id), id);
         });
     }
 
@@ -43,10 +43,10 @@ public class GenreService {
         for (int i = 0; i < genres.size(); i++) {
             if (genres.get(i).getId() > genreStorage.getAllGenres().size()) {
                 log.warn("Жанр с индексом id {} в базе не найден", genres.get(i).getId());
-                throw new NotFoundGenreException(String.format("Жанр с индексом id %d в базе не найден",
+                throw new EntityNotFoundException(String.format("Жанр с индексом id %d в базе не найден",
                         genres.get(i).getId()), genres.get(i).getId());
             }
-            log.debug("GenreService. Обновление жанров");
+            log.debug("Обновление жанров");
             if (genres.get(i).getId() != 0 && genres.get(i).getId() != null) {
                 genreStorage.putGenre(id, genres.get(i).getId());
             }

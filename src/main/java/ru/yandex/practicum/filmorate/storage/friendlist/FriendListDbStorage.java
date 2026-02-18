@@ -1,0 +1,66 @@
+package ru.yandex.practicum.filmorate.storage.friendlist;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.FriendsList;
+import ru.yandex.practicum.filmorate.storage.BaseStorage;
+
+import java.util.List;
+
+@Slf4j
+@Repository
+public class FriendListDbStorage extends BaseStorage<FriendsList> implements FriendListStorage {
+
+    public FriendListDbStorage(JdbcTemplate jdbc, RowMapper<FriendsList> mapper) {
+        super(jdbc, mapper, FriendsList.class);
+    }
+
+    private static final String INSERT_QUERY = "INSERT INTO friends_list(user_id, friend_id, status) " +
+            "VALUES (?, ?, 'CONFIRMED')";
+    private static final String DELETE_QUERY = "DELETE FROM friends_list WHERE user_id = ? AND friend_id = ?";
+    private static final String SELECT_FRIEND_USER_QUERY = "SELECT * FROM friends_list WHERE user_id = ? " +
+            "AND friend_id = ?";
+    private static final String UPDATE_STATUS_QUERY = "UPDATE friends_list SET status = ? WHERE user_id = ? " +
+            "AND friend_id = ?";
+    private static final String GET_FRIENDS_WITH_STATUS_QUERY = "SELECT * FROM friends_list WHERE user_id = ? " +
+            "AND status = ?";
+    private static final String DELETE_ALL_FRIENDS_FOR_USER_QUERY = "DELETE FROM friends_list WHERE user_id = ? " +
+            "OR friend_id = ?";
+
+    @Override
+    public void addFriend(long userId, long friendId) {
+        log.debug("Добавление пользователю с id {} друга с friendId {}", userId, friendId);
+        update(INSERT_QUERY, userId, friendId);
+    }
+
+    @Override
+    public void deleteFriend(long userId, long friendId) {
+        log.debug("Удаление у пользователя с id {} друга с friendId {}", userId, friendId);
+        update(DELETE_QUERY, userId, friendId);
+    }
+
+    @Override
+    public boolean containsFriend(long userId, long friendId) {
+        return findOne(SELECT_FRIEND_USER_QUERY, userId, friendId).isPresent();
+    }
+
+    @Override
+    public void updateFriendshipStatus(long userId, long friendId, String status) {
+        log.debug("Обновление статуса дружбы между {} и {} на {}", userId, friendId, status);
+        update(UPDATE_STATUS_QUERY, status, userId, friendId);
+    }
+
+    @Override
+    public List<FriendsList> getFriendsWithStatus(long userId, String status) {
+        log.debug("Получение друзей пользователя {} со статусом {}", userId, status);
+        return findMany(GET_FRIENDS_WITH_STATUS_QUERY, userId, status);
+    }
+
+    @Override
+    public void deleteAllFriendsForUser(long userId) {
+        log.debug("deleteAllFriendsForUser userId {}", userId);
+        jdbc.update(DELETE_ALL_FRIENDS_FOR_USER_QUERY, userId, userId);
+    }
+}

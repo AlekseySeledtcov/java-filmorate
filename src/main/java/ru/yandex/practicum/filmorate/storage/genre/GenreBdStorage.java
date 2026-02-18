@@ -28,19 +28,19 @@ public class GenreBdStorage extends BaseStorage<Genre> implements GenreStorage {
 
     @Override
     public List<Genre> getAllGenres() {
-        log.debug("GenreBdStorage. getAllGenres");
+        log.debug("getAllGenres");
         return findMany(GET_ALL_GENRE_QUERY);
     }
 
     @Override
     public Optional<Genre> getGenreById(long id) {
-        log.debug("GenreBdStorage. getGenreById {}", id);
+        log.debug("getGenreById {}", id);
         return findOne(GET_GENRE_BY_ID_QUERY, id);
     }
 
     @Override
     public boolean containsGenre(long filmId) {
-        log.debug("GenreBdStorage. deletecontainsGenre filmid {}", filmId);
+        log.debug("deletecontainsGenre filmid {}", filmId);
         long count = jdbc.queryForObject(CONTAINS_GENRE_BY_FILM_ID_QUERY, long.class, filmId);
         return count > 0;
     }
@@ -52,13 +52,13 @@ public class GenreBdStorage extends BaseStorage<Genre> implements GenreStorage {
 
     @Override
     public void putGenre(long filmId, int genreId) {
-        log.debug("GenreBdStorage. putGenre filmid {} genreId {}", filmId, genreId);
+        log.debug("putGenre filmid {} genreId {}", filmId, genreId);
         update(PUT_GENRE_BY_FILM_ID_QUERY, filmId, genreId);
     }
 
     @Override
     public void deleteGenre(long filmId) {
-        log.debug("GenreBdStorage. deleteGenre filmid {}", filmId);
-        update(DELETE_GENRE_BY_FILM_ID_QUERY, filmId);
+        log.debug("deleteGenre filmid {}", filmId);
+        jdbc.update(DELETE_GENRE_BY_FILM_ID_QUERY, filmId);
     }
 }

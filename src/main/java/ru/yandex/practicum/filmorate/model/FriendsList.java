@@ -10,4 +10,5 @@ import lombok.Setter;
 public class FriendsList {
     private long userId;
     private long friendId;
+    private String status;
 }

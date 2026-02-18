@@ -1,15 +1,16 @@
 package ru.yandex.practicum.filmorate;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
-
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -18,12 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest
+@AutoConfigureTestDatabase
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class FilmorateApplicationTests {
-
-    @Test
-    void contextLoads() {
-
-    }
 
     private Validator validator;
 
@@ -35,10 +33,19 @@ class FilmorateApplicationTests {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
 
-        user = new User("Email@email.ru", "Login", "Name",
-                LocalDate.of(1980, 6, 19));
-        film = new Film("FilmName", "FilmDescription",
-                LocalDate.of(2021, 9, 16), 155);
+        user = new User(
+                "Email@email.ru",
+                "Login",
+                "Name",
+                LocalDate.of(1980, 6, 19)
+        );
+
+        film = Film.builder()
+                .name("FilmName")
+                .description("FilmDescription")
+                .releaseDate(LocalDate.of(2021, 9, 16))
+                .duration(155)
+                .build();
     }
 
     @Test
@@ -61,18 +68,22 @@ class FilmorateApplicationTests {
 
     @Test
     void checkThatIfTheNameIsEmptyThenLoginIsUsedInsteadOfTheName() {
-        User user1 = new User("Email@email.ru", "Login", null,
-                LocalDate.of(1980, 6, 19));
+        User user1 = new User(
+                "Email@email.ru",
+                "Login",
+                null,
+                LocalDate.of(1980, 6, 19)
+        );
 
-        assertEquals(user1.getLogin(), user1.getName(), "Если поле name пустое, то ему должно" +
-                "присвоиться занчение поля login");
+        assertEquals(user1.getLogin(), user1.getName(), "Если поле name пустое, то ему должно " +
+                "присвоиться значение поля login");
     }
 
     @Test
     void checkingThatTheBirthdayDateCannotBeInTheFuture() {
         user.setBirthday(LocalDate.now().plusDays(1));
         Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertFalse(violations.isEmpty(), "дата дня рождения не может быть в будующем");
+        assertFalse(violations.isEmpty(), "дата дня рождения не может быть в будущем");
     }
 
     @Test
@@ -96,7 +107,7 @@ class FilmorateApplicationTests {
         }
         film.setDescription(description.toString());
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertFalse(violations.isEmpty(), "Максимальная длинна описания - 200 симвлов");
+        assertFalse(violations.isEmpty(), "Максимальная длина описания - 200 символов");
     }
 
     @Test

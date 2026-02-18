@@ -3,20 +3,15 @@ package ru.yandex.practicum.filmorate.model;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Past;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.yandex.practicum.filmorate.annotations.Login;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter
+@Setter
 public class User {
     private Long id;
     @NotEmpty
@@ -30,16 +25,11 @@ public class User {
     private Set<Long> friendsList;
 
     public User(String email, String login, String name, LocalDate birthday) {
-        id = 0L;
+        this.id = 0L;
         this.email = email;
         this.login = login;
-        this.name = name == null ? login : name;
+        this.name = (name == null || name == "") ? login : name;
         this.birthday = birthday;
         this.friendsList = new HashSet<>();
     }
-
-    public void updateUserFriendsList(long friendId) {
-        friendsList.add(friendId);
-    }
 }
-
