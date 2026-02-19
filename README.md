@@ -47,7 +47,7 @@ _________________
 - **Сборка:** Maven.
 - **Фреймворки:** Spring Boot, Spring Web, Spring Data JPA, JUnit.
 - **БД:** H2.
-- **Прочее:** Spring JDBC, Spring Validation,  Lombok, Jakarta Validation API, REST API, Postman, SLF4J.
+- **Прочее:** Spring JDBC, Spring Validation, Lombok, Jakarta Validation API, REST API, Postman, SLF4J.
 
 ![ER-диаграмма](/src/main/resources/Filmorate.png)
 
@@ -69,7 +69,7 @@ _________________
 
 3. Выполните команду:
 ```bash
-git clone https://ваш-url-репозитория.git
+git clone https://github.com/AlekseySeledtcov/java-filmorate.git
 ```
    
 4. Перейдите в директорию проекта:
